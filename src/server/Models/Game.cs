@@ -1,8 +1,8 @@
 ﻿using meerkat;
 using meerkat.Attributes;
-using word_sprout_api.Enums;
+using WordSproutApi.Enums;
 
-namespace word_sprout_api.Models;
+namespace WordSproutApi.Models;
 
 [Collection(Name = "games", TrackTimestamps = true)]
 public class Game : Schema
@@ -16,6 +16,8 @@ public class Game : Schema
     public TimeSpan MaxRoundDuration { get; set; }
 
     public List<string> Columns { get; set; }
+
+    public List<char> CharacterSet { get; set; }
 
     public GameStatus Status { get; set; }
 

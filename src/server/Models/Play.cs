@@ -1,4 +1,4 @@
-﻿namespace word_sprout_api.Models;
+﻿namespace WordSproutApi.Models;
 
 public class Play
 {

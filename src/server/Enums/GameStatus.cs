@@ -1,4 +1,4 @@
-﻿namespace word_sprout_api.Enums;
+﻿namespace WordSproutApi.Enums;
 
 public enum GameStatus
 {

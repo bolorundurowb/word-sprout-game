@@ -1,4 +1,4 @@
-﻿namespace word_sprout_api.Controllers;
+﻿namespace WordSproutApi.Controllers;
 
 public class GamesController
 {

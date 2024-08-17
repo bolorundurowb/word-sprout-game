@@ -1,6 +1,4 @@
-﻿using MongoDB.Bson;
-
-namespace word_sprout_api.Models;
+﻿namespace WordSproutApi.Models;
 
 public class Player
 {
