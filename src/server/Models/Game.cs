@@ -1,6 +1,8 @@
 ﻿using meerkat;
 using meerkat.Attributes;
+using shortid;
 using WordSproutApi.Enums;
+using WordSproutApi.Utilities;
 
 namespace WordSproutApi.Models;
 
@@ -8,7 +10,7 @@ namespace WordSproutApi.Models;
 public class Game : Schema
 {
     public string Code { get; set; }
-    
+
     public string InitiatedBy { get; set; }
 
     public TimeSpan MaxIntervalBetweenRounds { get; set; }
@@ -19,8 +21,34 @@ public class Game : Schema
 
     public List<char> CharacterSet { get; set; }
 
+    public List<Player> Players { get; set; }
+
     public GameStatus Status { get; set; }
 
-    public GameState State { get; set; }
-}
+    public GameState? State { get; set; }
 
+    private Game() { }
+
+    public Game(string userName, int maxIntervalBetweenRoundsInSecs, int maxRoundDurationInSecs, List<string> columns,
+        List<char> characterSet) : base()
+    {
+        Code = ShortId.Generate(Constants.GameCodeGenOptions);
+        Status = GameStatus.AwaitingPlayers;
+
+        InitiatedBy = userName;
+        MaxIntervalBetweenRounds = TimeSpan.FromSeconds(maxIntervalBetweenRoundsInSecs);
+        MaxRoundDuration = TimeSpan.FromSeconds(maxRoundDurationInSecs);
+        Columns = columns;
+        CharacterSet = characterSet;
+
+        Players = new List<Player>
+        {
+            new()
+            {
+                UserName = userName,
+                JoinedAt = DateTimeOffset.UtcNow,
+                Plays = new List<Play>()
+            }
+        };
+    }
+}

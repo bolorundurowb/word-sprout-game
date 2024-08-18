@@ -2,6 +2,7 @@
 
 public enum GameStatus
 {
+    AwaitingPlayers,
     Active,
     Completed,
     Expired
