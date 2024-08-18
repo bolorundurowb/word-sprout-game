@@ -1,6 +1,8 @@
-﻿namespace WordSproutApi.Controllers;
+﻿using Microsoft.AspNetCore.Mvc;
 
-public class GamesController
+namespace WordSproutApi.Controllers;
+
+public class GamesController : ControllerBase
 {
     
 }
