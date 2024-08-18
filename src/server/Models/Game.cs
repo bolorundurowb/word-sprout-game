@@ -13,9 +13,9 @@ public class Game : Schema
 
     public string InitiatedBy { get; set; }
 
-    public TimeSpan MaxIntervalBetweenRounds { get; set; }
+    public int MaxIntervalBetweenRoundsInSecs { get; set; }
 
-    public TimeSpan MaxRoundDuration { get; set; }
+    public int MaxRoundDurationInSecs { get; set; }
 
     public List<string> Columns { get; set; }
 
@@ -36,8 +36,8 @@ public class Game : Schema
         Status = GameStatus.AwaitingPlayers;
 
         InitiatedBy = userName;
-        MaxIntervalBetweenRounds = TimeSpan.FromSeconds(maxIntervalBetweenRoundsInSecs);
-        MaxRoundDuration = TimeSpan.FromSeconds(maxRoundDurationInSecs);
+        MaxIntervalBetweenRoundsInSecs = maxIntervalBetweenRoundsInSecs;
+        MaxRoundDurationInSecs = maxRoundDurationInSecs;
         Columns = columns;
         CharacterSet = characterSet;
 
