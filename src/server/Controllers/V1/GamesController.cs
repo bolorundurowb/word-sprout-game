@@ -1,4 +1,5 @@
-﻿using meerkat;
+﻿using AutoMapper;
+using meerkat;
 using Microsoft.AspNetCore.Mvc;
 using WordSproutApi.Enums;
 using WordSproutApi.Models;
@@ -8,30 +9,22 @@ using WordSproutApi.Responses;
 namespace WordSproutApi.Controllers.V1;
 
 [Route("api/v1/games")]
-public class GamesController : BaseApiController
+public class GamesController(IMapper mapper) : BaseApiController
 {
-    [HttpPost("check")]
-    [ProducesResponseType(typeof(CheckGameRes), 200)]
-    [ProducesResponseType(typeof(GenericRes), 400)]
-    public async Task<IActionResult> Check([FromBody] CheckGameReq req)
-    {
-        var activeGameExists = await Meerkat.ExistsAsync<Game>(x =>
-            x.Code == req.Code && x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active);
-        return Ok(new CheckGameRes(activeGameExists));
-    }
-
-    [HttpGet("{gameCode}")]
+    [HttpPost("{gameCode}/join")]
     [ProducesResponseType(typeof(Game), 200)]
     [ProducesResponseType(typeof(GenericRes), 404)]
-    public async Task<IActionResult> GetById(string gameCode)
+    public async Task<IActionResult> JoinGame(string gameCode, [FromBody] JoinGameReq req)
     {
         var game = await Meerkat.FindOneAsync<Game>(x =>
             x.Code == gameCode && x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active);
 
         if (game == null)
             return NotFound("Game does not exist");
+        
+        game.AddPlayer(req.UserName);
 
-        return Ok(game);
+        return Ok(mapper.Map<GameRes>(game));
     }
 
     [HttpPost("")]
@@ -43,6 +36,6 @@ public class GamesController : BaseApiController
             req.CharacterSet);
         await game.SaveAsync();
 
-        return Ok(game);
+        return Ok(mapper.Map<GameRes>(game));
     }
 }

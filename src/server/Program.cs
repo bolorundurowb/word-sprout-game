@@ -29,6 +29,8 @@ builder.Services.AddFluentValidationAutoValidation(cfg =>
     cfg.OverrideDefaultResultFactoryWith<CustomValidationResultFactory>();
 });
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 // connect to the database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

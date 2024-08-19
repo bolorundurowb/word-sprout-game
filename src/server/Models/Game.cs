@@ -43,12 +43,16 @@ public class Game : Schema
 
         Players = new List<Player>
         {
-            new()
-            {
-                UserName = userName,
-                JoinedAt = DateTimeOffset.UtcNow,
-                Plays = new List<Play>()
-            }
+            new(userName)
         };
+    }
+
+    public void AddPlayer(string userName)
+    {
+        var player = new Player(userName);
+        Players.Add(player);
+
+        if (Status == GameStatus.AwaitingPlayers)
+            Status = GameStatus.Active;
     }
 }
