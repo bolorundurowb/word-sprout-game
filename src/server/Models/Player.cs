@@ -15,6 +15,6 @@ public class Player
         Plays = new List<Play>();
         JoinedAt = DateTimeOffset.UtcNow;
 
-        UserName = userName;
+        UserName = userName.ToLowerInvariant();
     }
 }

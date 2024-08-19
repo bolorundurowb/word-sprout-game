@@ -4,22 +4,27 @@ using IGeekFan.AspNetCore.RapiDoc;
 using meerkat;
 using WordSproutApi.Utilities;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using WordSproutApi.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSignalR();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CORSPolicy",
+        opts => opts
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .SetIsOriginAllowed(_ => true)
+    );
+});
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "Word Sprout API",
-        Version = "v1"
-    });
-});
+builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
@@ -57,10 +62,13 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+app.UseCors("CORSPolicy");
+app.UseRouting();
 
 app.UseAuthorization();
+app.UseHttpsRedirection();
 
 app.MapControllers();
+app.MapHub<GameHub>("/rt/v1/games");
 
 app.Run();
