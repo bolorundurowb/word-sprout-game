@@ -4,10 +4,20 @@ namespace WordSproutApi.Hubs;
 
 public interface IGameHubClient
 {
-    Task PlayerJoined(string userName);
+    Task PlayerJoined(string gameCode, string userName);
+
+    Task GameStarted(string gameCode);
+
+    Task RoundCountdownInitiated(string gameCode, string turnUsername);
 }
 
 public class GameHub : Hub<IGameHubClient>
 {
-    public async Task PlayerJoined(string userName) => await Clients.All.PlayerJoined(userName);
+    public async Task PlayerJoined(string gameCode, string userName) =>
+        await Clients.All.PlayerJoined(gameCode, userName);
+
+    public async Task GameStarted(string gameCode) => await Clients.All.GameStarted(gameCode);
+
+    public async Task RoundCountdownInitiated(string gameCode, string userName) =>
+        await Clients.All.RoundCountdownInitiated(gameCode, userName);
 }

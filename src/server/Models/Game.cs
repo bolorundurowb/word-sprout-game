@@ -51,8 +51,11 @@ public class Game : Schema
     {
         var player = new Player(userName);
         Players.Add(player);
+    }
 
-        if (Status == GameStatus.AwaitingPlayers)
-            Status = GameStatus.Active;
+    public void Start()
+    {
+        Status = GameStatus.Active;
+        State = new GameState(InitiatedBy);
     }
 }
