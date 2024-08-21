@@ -58,4 +58,6 @@ public class Game : Schema
         Status = GameStatus.Active;
         State = new GameState(InitiatedBy);
     }
+
+    public void StartRound(char character) => State!.CurrentCharacter = character;
 }

@@ -65,4 +65,24 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         return Ok(mapper.Map<GameRes>(game));
     }
+
+    [HttpPost("{gameCode}/start-round")]
+    [ProducesResponseType(typeof(GameRes), 200)]
+    [ProducesResponseType(typeof(GenericRes), 404)]
+    public async Task<IActionResult> StartRound(string gameCode, [FromBody] StartRoundReq req)
+    {
+        var game = await Meerkat.FindOneAsync<Game>(x =>
+            x.Code == gameCode && x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active);
+
+        if (game == null)
+            return NotFound("Game does not exist");
+
+        game.StartRound(req.Character);
+        await game.SaveAsync();
+
+        // notify the other users that the game is started and the countdown should start
+        await gameHub.Clients.All.RoundStarted(gameCode, req.PlayerUsername, req.Character);
+
+        return Ok(mapper.Map<GameRes>(game));
+    }
 }

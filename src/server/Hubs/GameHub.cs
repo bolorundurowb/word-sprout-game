@@ -9,6 +9,8 @@ public interface IGameHubClient
     Task GameStarted(string gameCode);
 
     Task RoundCountdownInitiated(string gameCode, string turnUsername);
+
+    Task RoundStarted(string gameCode, string turnUsername, char character);
 }
 
 public class GameHub : Hub<IGameHubClient>
@@ -20,4 +22,7 @@ public class GameHub : Hub<IGameHubClient>
 
     public async Task RoundCountdownInitiated(string gameCode, string userName) =>
         await Clients.All.RoundCountdownInitiated(gameCode, userName);
+
+    public async Task RoundStarted(string gameCode, string turnUsername, char character) =>
+        await Clients.All.RoundStarted(gameCode, turnUsername, character);
 }
