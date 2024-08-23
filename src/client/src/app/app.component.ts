@@ -5,7 +5,7 @@ import { TuiRoot } from '@taiga-ui/core';
 @Component({
   selector: 'ws-root',
   standalone: true,
-  imports: [RouterOutlet, TuiRoot],
+  imports: [ RouterOutlet, TuiRoot ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
