@@ -1,0 +1,21 @@
+.how-to {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+
+  .instructions-header {
+    text-align: center;
+  }
+
+  ul {
+    list-style-type: "→";
+  }
+
+  li {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    text-align: justify;
+    line-height: 1.75rem;
+  }
+}
