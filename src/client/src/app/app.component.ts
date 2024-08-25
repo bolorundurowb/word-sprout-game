@@ -10,5 +10,4 @@ import { TuiRoot, TuiTitle } from '@taiga-ui/core';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'word-spout-web';
 }

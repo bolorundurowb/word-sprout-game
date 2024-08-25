@@ -9,7 +9,7 @@
   }
 
   ul {
-    list-style-type: "→ ";
+    list-style-type: "→  ";
   }
 
   li {
@@ -26,6 +26,27 @@
   }
 
   .ws-button-group {
-    margin-left: auto; margin-right: auto; display: table;
+    margin-left: auto;
+    margin-right: auto;
+    display: table;
   }
 }
+
+@media only screen and (max-width: 768px) {
+  .how-to {
+    width: 60%;
+
+    .ws-button-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .how-to {
+    width: 75%;
+  }
+}
+
