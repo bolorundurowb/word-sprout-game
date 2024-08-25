@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
   selector: 'ws-how-to',
   standalone: true,
   imports: [],
-  template: `<div>How To</div>`
+  templateUrl: 'how-to.component.html',
+  styleUrl: 'how-to.component.scss',
 })
 export class HowToComponent {}
