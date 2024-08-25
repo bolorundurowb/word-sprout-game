@@ -4,6 +4,6 @@ import { Component } from '@angular/core';
   selector: 'ws-new-game',
   standalone: true,
   imports: [],
-  template: `<div>New Game</div>`
+  templateUrl: 'new-game.component.html'
 })
 export class NewGameComponent {}

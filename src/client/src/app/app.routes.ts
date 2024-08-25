@@ -14,11 +14,11 @@ export const routes: Routes = [
     component: HowToComponent
   },
   {
-    path: 'new-game',
+    path: 'games/new',
     component: NewGameComponent
   },
   {
-    path: 'active-game/:gameCode',
+    path: 'games/active/:gameCode',
     component: ActiveGameComponent
   }
 ];

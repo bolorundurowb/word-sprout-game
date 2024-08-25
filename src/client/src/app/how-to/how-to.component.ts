@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TuiButton, TuiTitle } from '@taiga-ui/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'ws-how-to',
@@ -12,4 +13,10 @@ import { TuiButton, TuiTitle } from '@taiga-ui/core';
   styleUrl: 'how-to.component.scss',
 })
 export class HowToComponent {
+  constructor(private router: Router) {
+  }
+
+  async goToNewGame() {
+    await this.router.navigate(['games/new']);
+  }
 }
