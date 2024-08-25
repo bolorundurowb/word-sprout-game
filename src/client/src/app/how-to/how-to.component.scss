@@ -9,7 +9,7 @@
   }
 
   ul {
-    list-style-type: "→";
+    list-style-type: "→ ";
   }
 
   li {
@@ -17,5 +17,15 @@
     margin-bottom: 0.5rem;
     text-align: justify;
     line-height: 1.75rem;
+  }
+
+  .play-header {
+    text-align: center;
+    margin-top: 2.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .ws-button-group {
+    margin-left: auto; margin-right: auto; display: table;
   }
 }

@@ -3,3 +3,27 @@ body {
   font-family: "Manrope", sans-serif;
   font-size: 16px;
 }
+
+.ws-button {
+  font-family: "Manrope", sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  text-transform: lowercase;
+  width: 13rem;
+  height: 3rem;
+  background-color: black;
+  color: white;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 0.5rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
+
+  &.outline {
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+  }
+}
