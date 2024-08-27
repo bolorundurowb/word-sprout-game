@@ -4,6 +4,55 @@
   </div>
 
   <div class="form-container">
-Hello
+    <form [formGroup]="gameForm">
+      <p>
+        <tui-input
+          formControlName="username"
+          [tuiTextfieldCleaner]="true">
+          Username
+          <input
+            tuiTextfieldLegacy/>
+        </tui-input>
+      </p>
+      <p>
+        <tui-input-number
+          formControlName="maxRoundDurationInSecs"
+          tuiTextfieldPostfix="secs">
+          Max Round Duration
+          <input
+            tuiTextfieldLegacy
+            min="1"
+            max="60"/>
+        </tui-input-number>
+      </p>
+      <p>
+        <tui-input-number
+          formControlName="maxIntervalBetweenRoundsInSecs"
+          tuiTextfieldPostfix="secs">
+          Max Interval Duration
+          <input
+            tuiTextfieldLegacy
+            min="1"
+            max="30"/>
+        </tui-input-number>
+      </p>
+      <p>
+        <tui-input-tag
+          formControlName="columns"
+          [uniqueTags]="true"
+          [tuiTextfieldLabelOutside]="true">
+          Column Names
+        </tui-input-tag>
+      </p>
+      <p>
+        <tui-input-tag
+          [uniqueTags]="true"
+          [tuiTextfieldCleaner]="true"
+          formControlName="characterSet"
+          [tuiTextfieldLabelOutside]="true">
+          Characters
+        </tui-input-tag>
+      </p>
+    </form>
   </div>
 </div>

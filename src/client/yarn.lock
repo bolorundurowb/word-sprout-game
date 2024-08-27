@@ -1772,6 +1772,13 @@
   dependencies:
     tslib "^2.6.3"
 
+"@taiga-ui/legacy@^4.3.0":
+  version "4.4.0"
+  resolved "https://registry.npmjs.org/@taiga-ui/legacy/-/legacy-4.4.0.tgz"
+  integrity sha512-CZMEuF0d25xVP9aMTIl4ooPcJl89vBsg2edilDvEX17GIa7G1lx2dpJs6tvpI9FQWLBZzCDKksFQvEnmxeGkdQ==
+  dependencies:
+    tslib "^2.6.3"
+
 "@taiga-ui/polymorpheus@^4.6.4":
   version "4.6.6"
   resolved "https://registry.npmjs.org/@taiga-ui/polymorpheus/-/polymorpheus-4.6.6.tgz"
