@@ -94,8 +94,7 @@ export class NewGameComponent implements OnInit {
       // reroute to the active game page
       await this.router.navigate([ 'games', 'active', res.code ]);
     } catch (e) {
-      console.log(e);
-      this.alerts.open(e as string || 'Something went wrong', {
+      this.alerts.open((e as any)?.error?.message ?? 'Something went wrong', {
         label: 'Error',
         appearance: 'error',
         autoClose: 0,

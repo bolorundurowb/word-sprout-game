@@ -17,7 +17,7 @@ import { GameService } from '../services/game.service';
     TuiInputModule,
     TuiTextfield,
     ReactiveFormsModule,
-    TuiLoader
+    TuiLoader,
   ],
   templateUrl: 'join-game.component.html',
   styleUrl: 'join-game.component.scss',
@@ -55,7 +55,7 @@ export class JoinGameComponent implements OnInit {
 
     try {
       const payload = this.joinForm.value;
-      const res = await this.gameService.create(payload) as any;
+      const res = await this.gameService.join(payload) as any;
 
       this.alerts.open('Game joined successfully', {
         label: 'Success',
@@ -69,7 +69,7 @@ export class JoinGameComponent implements OnInit {
       // reroute to the active game page
       await this.router.navigate([ 'games', 'active', res.code ]);
     } catch (e) {
-      this.alerts.open(e as string || 'Something went wrong', {
+      this.alerts.open((e as any)?.error?.message ?? 'Something went wrong', {
         label: 'Error',
         appearance: 'error',
         autoClose: 0,
