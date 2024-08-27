@@ -19,4 +19,8 @@ export class HowToComponent {
   async goToNewGame() {
     await this.router.navigate(['games/new']);
   }
+
+  async goToJoinGame() {
+    await this.router.navigate(['games/join']);
+  }
 }

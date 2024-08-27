@@ -1,0 +1,36 @@
+.join-game {
+  width: 45%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+
+  .form-header {
+    text-align: center;
+  }
+
+  .form-container {
+    border: 0.1rem solid #BABABA;
+    border-radius: 1rem;
+    padding: 1rem 1.5rem;
+    margin-top: 2rem;
+
+    form {
+      button {
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .join-game {
+    width: 60%;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .join-game {
+    width: 75%;
+  }
+}

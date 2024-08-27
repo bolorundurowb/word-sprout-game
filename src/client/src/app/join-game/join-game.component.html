@@ -1,0 +1,38 @@
+<div class="join-game">
+  <div tuiTitle="m" class="form-header">
+    Join a Game
+  </div>
+
+  <div class="form-container">
+    <form [formGroup]="joinForm">
+      <p>
+        <tui-input
+          formControlName="username"
+          [tuiTextfieldCleaner]="true">
+          Username
+          <input
+            tuiTextfieldLegacy/>
+        </tui-input>
+      </p>
+      <p>
+        <tui-input
+          formControlName="gameCode"
+          [tuiTextfieldCleaner]="true">
+          Game Code
+          <input
+            tuiTextfieldLegacy/>
+        </tui-input>
+      </p>
+
+      <button
+        type="submit"
+        class="ws-button"
+        [disabled]="joinForm.invalid || isLoading"
+        (click)="joinGame()">
+        <tui-loader [showLoader]="isLoading">
+          Join
+        </tui-loader>
+      </button>
+    </form>
+  </div>
+</div>

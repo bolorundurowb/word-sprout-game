@@ -15,4 +15,8 @@ export class GameService {
   create(payload: any) {
     return this.http.post(this.BASE_API, payload).toPromise();
   }
+
+  join(payload: any) {
+    return this.http.post(`${this.BASE_API}/${payload.gameCode}/join`, { userName: payload.username }).toPromise();
+  }
 }
