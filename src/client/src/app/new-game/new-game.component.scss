@@ -9,10 +9,17 @@
   }
 
   .form-container {
-    border: 1.2px solid #BABABA;
+    border: 0.1rem solid #BABABA;
     border-radius: 1rem;
-    padding: 1.5rem;
+    padding: 1rem 1.5rem;
     margin-top: 2rem;
+
+    form {
+      button {
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
   }
 }
 

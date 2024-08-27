@@ -8,7 +8,7 @@ import {
 } from '@taiga-ui/legacy';
 import { Title } from '@angular/platform-browser';
 import { UserService } from '../services/user.service';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 interface NewGameReq {
   userName: string;
@@ -39,11 +39,29 @@ export class NewGameComponent implements OnInit {
   defaultCharacters = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' ];
 
   gameForm = new FormGroup({
-    username: new FormControl(''),
-    maxRoundDurationInSecs: new FormControl(30),
-    maxIntervalBetweenRoundsInSecs: new FormControl(15),
-    columns: new FormControl(this.defaultColumns),
-    characterSet: new FormControl(this.defaultCharacters),
+    username: new FormControl<string>('', [
+      Validators.required
+    ]),
+    maxRoundDurationInSecs: new FormControl<number>(30, [
+      Validators.min(10),
+      Validators.max(60),
+      Validators.required
+    ]),
+    maxIntervalBetweenRoundsInSecs: new FormControl<number>(15, [
+      Validators.min(5),
+      Validators.max(30),
+      Validators.required
+    ]),
+    columns: new FormControl<string[]>(this.defaultColumns, [
+      Validators.minLength(1),
+      Validators.maxLength(10),
+      Validators.required
+    ]),
+    characterSet: new FormControl<string[]>(this.defaultCharacters, [
+      Validators.minLength(1),
+      Validators.maxLength(100),
+      Validators.required
+    ]),
   });
 
   constructor(title: Title, private userService: UserService) {
@@ -51,6 +69,12 @@ export class NewGameComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.gameForm.get('username')?.setValue(this.userService.getUsername());
+    this.gameForm.patchValue({
+      username: this.userService.getUsername()
+    });
+  }
+
+  createGame() {
+    console.log('Hello world');
   }
 }
