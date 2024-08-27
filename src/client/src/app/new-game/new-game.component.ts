@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { TuiTextfield, TuiTitle } from '@taiga-ui/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { TuiAlertService, TuiLoader, TuiTextfield, TuiTitle } from '@taiga-ui/core';
 import {
   TuiInputModule,
   TuiInputNumberModule,
   TuiInputTagModule,
   TuiTextfieldControllerModule
 } from '@taiga-ui/legacy';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { UserService } from '../services/user.service';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { GameService } from '../services/game.service';
 
 interface NewGameReq {
   userName: string;
@@ -28,13 +30,20 @@ interface NewGameReq {
     TuiTextfieldControllerModule,
     TuiTextfield,
     TuiInputTagModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TuiLoader
   ],
   templateUrl: 'new-game.component.html',
   styleUrl: 'new-game.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewGameComponent implements OnInit {
+  private readonly alerts = inject(TuiAlertService);
+  private readonly router = inject(Router);
+  private readonly gameService = inject(GameService);
+  private readonly userService = inject(UserService);
+
+  isLoading = false;
   defaultColumns = [ 'Name', 'Animal', 'Place', 'Food', 'Thing/Item' ];
   defaultCharacters = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' ];
 
@@ -64,7 +73,7 @@ export class NewGameComponent implements OnInit {
     ]),
   });
 
-  constructor(title: Title, private userService: UserService) {
+  constructor(title: Title) {
     title.setTitle('New Game | Word Sprout');
   }
 
@@ -74,7 +83,33 @@ export class NewGameComponent implements OnInit {
     });
   }
 
-  createGame() {
-    console.log('Hello world');
+  async createGame() {
+    this.isLoading = true;
+
+    try {
+      const payload = this.gameForm.value;
+      const res = await this.gameService.create(payload) as any;
+
+      this.alerts.open('Game created successfully', {
+        label: 'Success',
+        appearance: 'success',
+        autoClose: 0,
+      }).subscribe();
+
+      // persist the chosen username
+      this.userService.setUsername(payload.username!);
+
+      // reroute to the active game page
+      await this.router.navigate([ 'games', 'active', res.code ]);
+    } catch (e) {
+      console.log(e);
+      this.alerts.open(e as string || 'Something went wrong', {
+        label: 'Error',
+        appearance: 'error',
+        autoClose: 0,
+      }).subscribe();
+    } finally {
+      this.isLoading = false;
+    }
   }
 }

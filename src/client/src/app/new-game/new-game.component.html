@@ -16,16 +16,16 @@
       </p>
       <p>
         <tui-input-number
-          formControlName="maxRoundDurationInSecs"
-          tuiTextfieldPostfix="secs">
+          tuiTextfieldPostfix="secs"
+          formControlName="maxRoundDurationInSecs">
           Max Round Duration
           <input tuiTextfieldLegacy/>
         </tui-input-number>
       </p>
       <p>
         <tui-input-number
-          formControlName="maxIntervalBetweenRoundsInSecs"
-          tuiTextfieldPostfix="secs">
+          tuiTextfieldPostfix="secs"
+          formControlName="maxIntervalBetweenRoundsInSecs">
           Max Interval Duration
           <input tuiTextfieldLegacy/>
         </tui-input-number>
@@ -51,9 +51,11 @@
       <button
         type="submit"
         class="ws-button"
-        [disabled]="gameForm.invalid"
+        [disabled]="gameForm.invalid || isLoading"
         (click)="createGame()">
-        Submit
+        <tui-loader [showLoader]="isLoading">
+          Submit
+        </tui-loader>
       </button>
     </form>
   </div>
