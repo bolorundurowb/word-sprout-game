@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { UserService } from '../services/user.service';
 import { GameService } from '../services/game.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'ws-join-game',
@@ -21,10 +22,9 @@ import { GameService } from '../services/game.service';
   ],
   templateUrl: 'join-game.component.html',
   styleUrl: 'join-game.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JoinGameComponent implements OnInit {
-  private readonly alerts = inject(TuiAlertService);
+  private readonly toasts = inject(ToastService);
   private readonly router = inject(Router);
   private readonly gameService = inject(GameService);
   private readonly userService = inject(UserService);
@@ -57,11 +57,7 @@ export class JoinGameComponent implements OnInit {
       const payload = this.joinForm.value;
       const res = await this.gameService.join(payload) as any;
 
-      this.alerts.open('Game joined successfully', {
-        label: 'Success',
-        appearance: 'success',
-        autoClose: 0,
-      }).subscribe();
+      this.toasts.showSuccess('Game joined successfully');
 
       // persist the chosen username
       this.userService.setUsername(payload.username!);
@@ -69,11 +65,7 @@ export class JoinGameComponent implements OnInit {
       // reroute to the active game page
       await this.router.navigate([ 'games', 'active', res.code ]);
     } catch (e) {
-      this.alerts.open((e as any)?.error?.message ?? 'Something went wrong', {
-        label: 'Error',
-        appearance: 'error',
-        autoClose: 0,
-      }).subscribe();
+      this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
     } finally {
       this.isLoading = false;
     }

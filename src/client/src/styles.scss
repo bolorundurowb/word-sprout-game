@@ -1,12 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
 
+:root {
+  --tui-font-heading: "Plus Jakarta Sans", -apple-system, "BlinkMacSystemFont", system-ui, "Roboto", "Segoe UI", "Helvetica Neue", sans-serif;
+  --tui-font-text: "Plus Jakarta Sans", -apple-system, "BlinkMacSystemFont", system-ui, "Roboto", "Segoe UI", "Helvetica Neue", sans-serif;
+
+}
+
 body {
-  font-family: "Manrope", sans-serif;
-  font-size: 16px;
+  font-family: var(--tui-font-text);
 }
 
 .ws-button {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--tui-font-text);
   font-weight: 500;
   font-size: 0.9rem;
   text-transform: lowercase;
@@ -33,4 +38,11 @@ body {
     cursor: not-allowed;
     opacity: 0.6;
   }
+}
+
+.ws-divider {
+  height: 1.2px;
+  background-color: #BABABA;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }

@@ -10,6 +10,7 @@
 
   ul {
     list-style-type: "→  ";
+    font-size: 1rem;
   }
 
   li {
@@ -17,6 +18,7 @@
     margin-bottom: 0.5rem;
     text-align: justify;
     line-height: 1.75rem;
+    color: var(--tui-text-primary);
   }
 
   .play-header {
