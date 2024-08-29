@@ -36,6 +36,9 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         if (game == null)
             return NotFound("Game does not exist");
 
+        if (game.Players.Any(x => x.UserName == req.UserName.Trim().ToLowerInvariant()))
+            return Conflict("A player with that username already exists");
+
         game.AddPlayer(req.UserName);
         await game.SaveAsync();
 
@@ -47,14 +50,20 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
     [HttpPost("{gameCode}/start")]
     [ProducesResponseType(typeof(GameRes), 200)]
+    [ProducesResponseType(typeof(GenericRes), 400)]
     [ProducesResponseType(typeof(GenericRes), 404)]
     public async Task<IActionResult> StartGame(string gameCode)
     {
-        var game = await Meerkat.FindOneAsync<Game>(x =>
-            x.Code == gameCode && x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active);
+        var game = await Meerkat.FindOneAsync<Game>(x => x.Code == gameCode);
 
         if (game == null)
-            return NotFound("Game does not exist");
+            return NotFound("Game with that code does not exist");
+
+        if (game.Status is not GameStatus.AwaitingPlayers)
+            return BadRequest("Only games awaiting players can be started");
+
+        if (game.Players.Count < 2)
+            return BadRequest("At least 2 players are required to start the game");
 
         game.Start();
         await game.SaveAsync();
@@ -68,14 +77,17 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
     [HttpPost("{gameCode}/start-round")]
     [ProducesResponseType(typeof(GameRes), 200)]
+    [ProducesResponseType(typeof(GenericRes), 400)]
     [ProducesResponseType(typeof(GenericRes), 404)]
     public async Task<IActionResult> StartRound(string gameCode, [FromBody] StartRoundReq req)
     {
-        var game = await Meerkat.FindOneAsync<Game>(x =>
-            x.Code == gameCode && x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active);
+        var game = await Meerkat.FindOneAsync<Game>(x => x.Code == gameCode);
 
         if (game == null)
-            return NotFound("Game does not exist");
+            return NotFound("Game with that code does not exist");
+
+        if (game.Status is not GameStatus.Active)
+            return BadRequest("Rounds can only be started in active games");
 
         game.StartRound(req.Character);
         await game.SaveAsync();
