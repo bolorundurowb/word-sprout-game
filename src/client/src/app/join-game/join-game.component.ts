@@ -1,8 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { TuiAlertService, TuiLoader, TuiTextfield, TuiTitle } from '@taiga-ui/core';
-import {
-  TuiInputModule,
-} from '@taiga-ui/legacy';
+import { Component, inject, OnInit } from '@angular/core';
+import { TuiLoader, TuiTextfield, TuiTitle } from '@taiga-ui/core';
+import { TuiInputModule } from '@taiga-ui/legacy';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
