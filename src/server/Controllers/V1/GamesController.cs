@@ -13,6 +13,20 @@ namespace WordSproutApi.Controllers.V1;
 [Route("api/v1/games")]
 public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient> gameHub) : BaseApiController
 {
+    [HttpGet("{gameCode}")]
+    [ProducesResponseType(typeof(GameRes), 200)]
+    [ProducesResponseType(typeof(GenericRes), 404)]
+    public async Task<IActionResult> GetByCode(string gameCode)
+    {
+        var game = await Meerkat.FindOneAsync<Game>(x =>
+            x.Code == gameCode && x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active);
+
+        if (game == null)
+            return NotFound("Game does not exist");
+
+        return Ok(mapper.Map<GameRes>(game));
+    }
+
     [HttpPost("")]
     [ProducesResponseType(typeof(GameRes), 200)]
     [ProducesResponseType(typeof(GenericRes), 400)]
