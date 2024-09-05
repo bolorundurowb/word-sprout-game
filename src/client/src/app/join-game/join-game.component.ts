@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { TuiLoader, TuiTextfield, TuiTitle } from '@taiga-ui/core';
 import { TuiInputModule } from '@taiga-ui/legacy';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { UserService } from '../services/user.service';
 import { GameService } from '../services/game.service';
@@ -38,13 +38,15 @@ export class JoinGameComponent implements OnInit {
     ]),
   });
 
-  constructor(title: Title) {
+  constructor(title: Title, private route: ActivatedRoute) {
     title.setTitle('Join Game | Word Sprout');
   }
 
   ngOnInit() {
+    const query = this.route.snapshot.queryParams;
     this.joinForm.patchValue({
-      username: this.userService.getUsername()
+      username: this.userService.getUsername(),
+      gameCode: query['code']
     });
   }
 

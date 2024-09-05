@@ -37,7 +37,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
             return NotFound("Game does not exist");
 
         if (game.Players.Any(x => x.UserName == req.UserName.Trim().ToLowerInvariant()))
-            return Conflict("A player with that username already exists");
+            return Conflict("A player with that username already exists for this game");
 
         game.AddPlayer(req.UserName);
         await game.SaveAsync();
