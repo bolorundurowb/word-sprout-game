@@ -17,4 +17,6 @@ public class GameRes
     public List<char> CharacterSet { get; set; }
 
     public GameState? State { get; set; }
+    
+    public List<PlayerRes> Players { get; set; }
 }

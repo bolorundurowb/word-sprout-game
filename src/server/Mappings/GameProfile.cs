@@ -8,6 +8,8 @@ public class GameProfile : Profile
 {
     public GameProfile()
     {
+        CreateMap<Player, PlayerRes>();
+        
         CreateMap<Game, GameRes>()
             .ForMember(
                 dst => dst.Id,
