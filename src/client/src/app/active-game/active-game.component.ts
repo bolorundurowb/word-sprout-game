@@ -68,4 +68,9 @@ export class ActiveGameComponent implements OnInit {
       await this.router.navigate([ '/' ]);
     }
   }
+
+  async copyGameUrl() {
+    await navigator.clipboard.writeText(this.joinGameUrl);
+    this.toasts.showSuccess('Game link copied to clipboard');
+  }
 }
