@@ -1,0 +1,29 @@
+<div class="active-game">
+  <div class="container">
+    <div>
+      Your Game
+    </div>
+
+    <div>
+      <div>
+        Ask players to join this game using this link:
+      </div>
+      <div>
+        <span>{{joinGameUrl}}</span>
+        <button>
+          Copy
+        </button>
+      </div>
+    </div>
+
+    <div>Players:</div>
+
+    <div>
+      <div *ngFor="let player of game.players">
+        <div>
+          {{ player | json }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

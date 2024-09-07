@@ -12,11 +12,18 @@ export class GameService {
   constructor(private http: HttpClient) {
   }
 
+  getByCode(gameCode: string) {
+    return this.http.get(`${this.BASE_API}/${gameCode}`)
+      .toPromise();
+  }
+
   create(payload: any) {
-    return this.http.post(this.BASE_API, payload).toPromise();
+    return this.http.post(this.BASE_API, payload)
+      .toPromise();
   }
 
   join(payload: any) {
-    return this.http.post(`${this.BASE_API}/${payload.gameCode}/join`, { userName: payload.username }).toPromise();
+    return this.http.post(`${this.BASE_API}/${payload.gameCode}/join`, { userName: payload.username })
+      .toPromise();
   }
 }
