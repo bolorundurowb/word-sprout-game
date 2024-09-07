@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { TuiAlertService, TuiLoader, TuiTextfield, TuiTitle } from '@taiga-ui/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { TuiLoader, TuiTextfield, TuiTitle } from '@taiga-ui/core';
 import {
   TuiInputModule,
   TuiInputNumberModule,

@@ -1,13 +1,82 @@
+$avatar-colors: #a2b9bc, #6b5b95, #feb236, #d64161, #ff7b25, #b2ad7f, #878f99;
+
 .active-game {
   width: 45%;
   margin-left: auto;
   margin-right: auto;
-  padding: 1rem;
+  margin-top: 2rem;
+  border: 0.1rem solid #BABABA;
+  border-radius: 1rem;
 
-  .container {
-    border: 0.1rem solid #BABABA;
-    border-radius: 1rem;
-    padding: 1rem 1.5rem;
+  .header {
+    text-align: center;
     margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .section-prompt {
+    font-size: 0.9rem;
+    margin: 1rem 2rem;
+  }
+
+  .invite-container {
+    margin: 1rem 2rem 2rem;
+    border: 0.1rem solid #BABABA;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    span {
+      //color: #79AADE ;
+      color: #73A074;
+      font-size: 0.85rem;
+    }
+  }
+
+  .players-container {
+    margin: 1rem 2rem 2rem;
+
+    .player {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+
+      .avatar {
+        color: #fff;
+        display: flex;
+        width: 3rem;
+        height: 3rem;
+        justify-content: center;
+        align-items: center;
+        border-radius: 100%;
+        margin-right: 0.75rem;
+
+        img {
+          height: 1.85rem;
+          width: 1.85rem;
+        }
+      }
+
+      @for $i from 1 through length($avatar-colors) {
+        .avatar:nth-child(#{length($avatar-colors)}n+#{$i}) {
+          background: lighten(nth($avatar-colors, $i), 20%);
+        }
+      }
+
+      span {
+        margin-right: 0.75rem;
+      }
+    }
+  }
+
+  .action {
+    padding-bottom: 1rem;
+    text-align: center;
   }
 }
+

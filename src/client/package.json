@@ -23,6 +23,7 @@
     "@maskito/core": "^3.0.1",
     "@maskito/kit": "^3.0.1",
     "@maskito/phone": "^3.0.1",
+    "@microsoft/signalr": "^8.0.7",
     "@ng-web-apis/common": "^4.2.1",
     "@ng-web-apis/intersection-observer": "^4.2.1",
     "@ng-web-apis/mutation-observer": "^4.2.1",

@@ -42,6 +42,12 @@ body {
 .ws-divider {
   height: 1.2px;
   background-color: #BABABA;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+[data-appearance='custom'] {
+  color: #fff;
+  background-color: black;
+  font-weight: bold;
 }

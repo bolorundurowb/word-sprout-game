@@ -1,29 +1,53 @@
 <div class="active-game">
-  <div class="container">
-    <div>
-      Your Game
-    </div>
+  <div class="header">
+    Game On: Awaiting Players
+  </div>
 
-    <div>
-      <div>
-        Ask players to join this game using this link:
-      </div>
-      <div>
-        <span>{{joinGameUrl}}</span>
-        <button>
-          Copy
-        </button>
-      </div>
-    </div>
+  <div class="section-prompt">
+    Ask players to join this game using the link below:
+  </div>
 
-    <div>Players:</div>
+  <div class="invite-container">
+    <span>{{ joinGameUrl }}</span>
+    <button tuiIconButton
+            size="s"
+            appearance="opposite"
+            iconStart="@tui.copy">
+      Copy
+    </button>
+  </div>
 
-    <div>
-      <div *ngFor="let player of game.players">
-        <div>
-          {{ player | json }}
+<!--  <div class="ws-divider"></div>-->
+
+  <div class="section-prompt">Players:</div>
+
+  <div class="players-container">
+    <ng-container *ngFor="let player of game.players">
+      <div class="player">
+        <div class="avatar">
+          <img src="/icons/user.png"/>
         </div>
+
+        <span>
+            {{ player.userName }}
+          </span>
+
+        <ng-container *ngIf="player.userName === currentUserName">
+          <tui-chip
+            size="xs"
+            appearance="custom">
+            you
+          </tui-chip>
+        </ng-container>
       </div>
-    </div>
+    </ng-container>
+  </div>
+
+  <div class="ws-divider"></div>
+
+  <div class="action">
+    <button class="ws-button">
+      Start
+    </button>
   </div>
 </div>
