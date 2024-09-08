@@ -8,7 +8,7 @@ import { ToastService } from '../services/toast.service';
 import { GameRealTimeService } from '../services/game-rt.service';
 import { TuiChip } from '@taiga-ui/kit';
 import { UserService } from '../services/user.service';
-import { TuiTable } from '@taiga-ui/addon-table';
+import { GameRoundRowComponent } from '../components/game-round-row.component';
 
 @Component({
   selector: 'ws-active-game',
@@ -21,9 +21,9 @@ import { TuiTable } from '@taiga-ui/addon-table';
     NgIf,
     TuiButton,
     TuiLoader,
-    TuiTable,
     NgStyle,
     NgOptimizedImage,
+    GameRoundRowComponent,
   ],
   templateUrl: 'active-game.component.html',
   styleUrl: 'active-game.component.scss'

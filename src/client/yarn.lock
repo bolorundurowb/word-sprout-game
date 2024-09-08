@@ -2160,13 +2160,6 @@
   resolved "https://registry.npmjs.org/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
 
-"@taiga-ui/addon-table@^4.5.0":
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/@taiga-ui/addon-table/-/addon-table-4.5.0.tgz#a871dfb5dbc409f565f8c793fbf7d3ac6ef92b7e"
-  integrity sha512-zMPVUqR1oYX1cwNvyhBxZwkRb6eJoOWJ/C3Z7bX6op1hwZlTloY7KbAiU8mfg0noqq2I3nCZT8gJSDC1O5e5SQ==
-  dependencies:
-    tslib "^2.7.0"
-
 "@taiga-ui/cdk@^4.5.0":
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/@taiga-ui/cdk/-/cdk-4.5.0.tgz#5902fcc6d2c089c740c796a04e478d81fc0e2301"

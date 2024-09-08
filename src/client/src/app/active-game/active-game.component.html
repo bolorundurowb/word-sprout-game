@@ -83,20 +83,30 @@
 
     <div class="ws-divider"></div>
 
-    <table
-      tuiTable
-      size="l"
-      [columns]="game.columns">
-<!--      <thead tuiHead>-->
-<!--      <tr tuiThGroup>-->
-<!--        <ng-container *ngFor="let column of game.columns">-->
-<!--          <th-->
-<!--            *tuiHead="column">-->
-<!--            {{ column }}-->
-<!--          </th>-->
-<!--        </ng-container>-->
-<!--      </tr>-->
-<!--      </thead>-->
+    <table>
+      <thead>
+      <tr>
+        <th class="char">
+          Character
+        </th>
+        <ng-container *ngFor="let column of game.columns">
+          <th>
+            {{ column }}
+          </th>
+        </ng-container>
+        <th class="score">
+          Score
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let char of game.characterSet">
+        <tr wsGameRoundRow
+            [character]="char"
+            [currentCharacter]="gameState.character"
+            [columns]="game.columns"></tr>
+      </ng-container>
+      </tbody>
     </table>
   </div>
 </ng-container>
