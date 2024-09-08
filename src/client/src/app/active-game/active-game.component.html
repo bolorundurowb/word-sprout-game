@@ -1,52 +1,79 @@
-<div class="active-game">
-  <div class="header">
-    Game On: Awaiting Players
-  </div>
+<ng-container *ngIf="!gameStarted">
+  <div class="active-game-awaiting">
+    <div class="header">
+      Game On: Awaiting Players
+    </div>
 
-  <div class="section-prompt">
-    Ask players to join this game using the link below:
-  </div>
+    <div class="section-prompt">
+      Ask players to join this game using the link below:
+    </div>
 
-  <div class="invite-container">
-    <span>{{ joinGameUrl }}</span>
-    <button tuiIconButton
-            size="s"
-            appearance="opposite"
-            iconStart="@tui.copy"
-    (click)="copyGameUrl()">
-      Copy
-    </button>
-  </div>
+    <div class="invite-container">
+      <span>{{ joinGameUrl }}</span>
+      <button tuiIconButton
+              size="s"
+              appearance="opposite"
+              iconStart="@tui.copy"
+              (click)="copyGameUrl()">
+        Copy
+      </button>
+    </div>
 
-  <div class="section-prompt">Players:</div>
+    <div class="section-prompt">Players:</div>
 
-  <div class="players-container">
-    <ng-container *ngFor="let player of game.players">
-      <div class="player">
-        <div class="avatar">
-          <img src="/icons/user.png"/>
-        </div>
+    <div class="players-container">
+      <ng-container *ngFor="let player of game.players">
+        <div class="player">
+          <div class="avatar">
+            <img src="/icons/user.png"/>
+          </div>
 
-        <span>
+          <span>
             {{ player.userName }}
           </span>
 
-        <ng-container *ngIf="player.userName === currentUserName">
-          <tui-chip
-            size="xs"
-            appearance="custom">
-            you
-          </tui-chip>
-        </ng-container>
-      </div>
-    </ng-container>
-  </div>
+          <ng-container *ngIf="player.userName === game.initiatedBy">
+            <tui-chip
+              size="xs"
+              appearance="admin">
+              admin
+            </tui-chip>
+          </ng-container>
 
-  <div class="ws-divider"></div>
+          <ng-container *ngIf="player.userName === currentUserName">
+            <tui-chip
+              size="xs"
+              appearance="user">
+              you
+            </tui-chip>
+          </ng-container>
+        </div>
+      </ng-container>
+    </div>
 
-  <div class="action">
-    <button class="ws-button">
-      Start
-    </button>
+    <div class="ws-divider"></div>
+
+    <div class="action">
+      <ng-container *ngIf="userInitiatedGame">
+        <button class="ws-button"
+                [disabled]="game.players?.length < 2"
+                (click)="startGame()">
+          <tui-loader [showLoader]="isLoading">
+            Start Game
+          </tui-loader>
+        </button>
+      </ng-container>
+      <ng-container *ngIf="!userInitiatedGame">
+        <div>Ask the game admin to start the game</div>
+      </ng-container>
+    </div>
   </div>
-</div>
+</ng-container>
+
+<ng-container *ngIf="gameStarted">
+  <div class="active-game-active">
+    <div class="header">
+      Game On {{currentUserName}}!!
+    </div>
+  </div>
+</ng-container>

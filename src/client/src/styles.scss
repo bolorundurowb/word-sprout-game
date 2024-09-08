@@ -46,8 +46,18 @@ body {
   margin-bottom: 1rem;
 }
 
-[data-appearance='custom'] {
+[data-appearance='user'] {
   color: #fff;
-  background-color: black;
-  font-weight: bold;
+  background-color: #2E8AA6;
+  font-weight: 500;
+  margin-left: 0.2rem;
+  margin-right: 0.2rem;
+}
+
+[data-appearance='admin'] {
+  color: #fff;
+  background-color: #86005F;
+  font-weight: 500;
+  margin-left: 0.2rem;
+  margin-right: 0.2rem;
 }

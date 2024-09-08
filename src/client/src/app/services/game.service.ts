@@ -4,6 +4,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -25,5 +26,9 @@ export class GameService {
   join(payload: any) {
     return this.http.post(`${this.BASE_API}/${payload.gameCode}/join`, { userName: payload.username })
       .toPromise();
+  }
+
+  start(gameCode: string) {
+    return firstValueFrom(this.http.post(`${this.BASE_API}/${gameCode}/start`, {}));
   }
 }

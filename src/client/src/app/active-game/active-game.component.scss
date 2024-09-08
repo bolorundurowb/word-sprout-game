@@ -1,6 +1,6 @@
 $avatar-colors: #a2b9bc, #6b5b95, #feb236, #d64161, #ff7b25, #b2ad7f, #878f99;
 
-.active-game {
+.active-game-awaiting {
   width: 45%;
   margin-left: auto;
   margin-right: auto;
@@ -77,6 +77,23 @@ $avatar-colors: #a2b9bc, #6b5b95, #feb236, #d64161, #ff7b25, #b2ad7f, #878f99;
   .action {
     padding-bottom: 1rem;
     text-align: center;
+  }
+}
+
+.active-game-active {
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
+  border: 0.1rem solid #BABABA;
+  border-radius: 1rem;
+
+  .header {
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
   }
 }
 

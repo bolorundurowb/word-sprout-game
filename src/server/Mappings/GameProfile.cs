@@ -14,6 +14,10 @@ public class GameProfile : Profile
             .ForMember(
                 dst => dst.Id,
                 opt => opt.MapFrom(src => src.Id.ToString())
+            )
+            .ForMember(
+                dst => dst.Status,
+                opt => opt.MapFrom(src => src.Status.ToString())
             );
     }
 }

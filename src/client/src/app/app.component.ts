@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { TuiRoot, TuiTitle } from '@taiga-ui/core';
 
 @Component({
@@ -10,4 +10,9 @@ import { TuiRoot, TuiTitle } from '@taiga-ui/core';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
+  private readonly router = inject(Router);
+
+  async goHome() {
+    await this.router.navigate(['/']);
+  }
 }

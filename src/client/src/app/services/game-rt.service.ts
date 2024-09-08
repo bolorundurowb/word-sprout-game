@@ -27,4 +27,24 @@ export class GameRealTimeService {
       });
     });
   }
+
+  gameStarted(): Observable<void> {
+    return new Observable(observer => {
+      this.hubConnection.on('GameStarted', (gameCode: string,) => {
+        if (gameCode === this.gameCode) {
+          observer.next();
+        }
+      });
+    });
+  }
+
+  roundCountdownInitiated(): Observable<string> {
+    return new Observable(observer => {
+      this.hubConnection.on('RoundCountdownInitiated', (gameCode: string, currentPlayerUserName: string) => {
+        if (gameCode === this.gameCode) {
+          observer.next(currentPlayerUserName);
+        }
+      });
+    });
+  }
 }

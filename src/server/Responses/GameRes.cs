@@ -1,12 +1,14 @@
-﻿using WordSproutApi.Models;
-
-namespace WordSproutApi.Responses;
+﻿namespace WordSproutApi.Responses;
 
 public class GameRes
 {
     public string Id { get; set; }
-    
+
     public string Code { get; set; }
+
+    public string Status { get; set; }
+
+    public string InitiatedBy { get; set; }
 
     public int MaxIntervalBetweenRoundsInSecs { get; set; }
 
@@ -16,7 +18,5 @@ public class GameRes
 
     public List<char> CharacterSet { get; set; }
 
-    public GameState? State { get; set; }
-    
     public List<PlayerRes> Players { get; set; }
 }

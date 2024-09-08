@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { TuiButton, TuiTitle } from '@taiga-ui/core';
+import { TuiButton, TuiLoader, TuiTitle } from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JsonPipe, NgForOf, NgIf } from '@angular/common';
@@ -18,7 +18,8 @@ import { UserService } from '../services/user.service';
     NgForOf,
     TuiChip,
     NgIf,
-    TuiButton
+    TuiButton,
+    TuiLoader
   ],
   templateUrl: 'active-game.component.html',
   styleUrl: 'active-game.component.scss'
@@ -29,12 +30,21 @@ export class ActiveGameComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly gameService = inject(GameService);
   private readonly userService = inject(UserService);
-  gameRtService?: GameRealTimeService;
 
-  currentUserName: string = '';
   gameCode: string = '';
   joinGameUrl: string = '';
   game: any = {};
+  gameRtService?: GameRealTimeService;
+
+  currentUserName: string = '';
+  userInitiatedGame = false;
+  isLoading = false;
+
+  gameStarted = false;
+  currentIntervalCountdown = 0;
+  currentRoundCountdown = 0;
+  gameState: any = {};
+
 
   constructor(title: Title) {
     title.setTitle('Active Game | Word Sprout');
@@ -57,11 +67,27 @@ export class ActiveGameComponent implements OnInit {
         throw new Error('You are not a player in this game');
       }
 
+      this.userInitiatedGame = this.game.initiatedBy === currentUserName;
+
       // set up the real time service
       this.gameRtService = new GameRealTimeService(this.gameCode);
       await this.gameRtService.init();
       this.gameRtService.playerJoined().subscribe(userName => {
         this.game.players.push({ userName });
+      });
+      this.gameRtService.gameStarted().subscribe(() => {
+        this.game.status = 'Active';
+        this.gameStarted = true;
+      });
+      this.gameRtService.roundCountdownInitiated().subscribe(currentPlayer => {
+        this.gameState.currentPlayer = currentPlayer;
+        this.currentIntervalCountdown = this.game.maxIntervalBetweenRoundsInSecs;
+        const intervalId = setInterval(() => {
+          this.currentIntervalCountdown -= 1;
+          if (this.currentIntervalCountdown === 0) {
+            clearInterval(intervalId);
+          }
+        }, 1000);
       });
     } catch (e) {
       this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
@@ -72,5 +98,17 @@ export class ActiveGameComponent implements OnInit {
   async copyGameUrl() {
     await navigator.clipboard.writeText(this.joinGameUrl);
     this.toasts.showSuccess('Game link copied to clipboard');
+  }
+
+  async startGame() {
+    this.isLoading = true;
+
+    try {
+      this.game = await this.gameService.start(this.gameCode);
+    } catch (e) {
+      this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
