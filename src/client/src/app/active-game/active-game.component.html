@@ -22,10 +22,10 @@
     <div class="section-prompt">Players:</div>
 
     <div class="players-container">
-      <ng-container *ngFor="let player of game.players">
+      <ng-container *ngFor="let player of game.players; let i = index">
         <div class="player">
-          <div class="avatar">
-            <img src="/icons/user.png"/>
+          <div class="avatar" [ngStyle]="{'background-color': avatarColour(i)}">
+            <img ngSrc="/icons/user.png" height="512" width="512" alt="Generic game player avatar"/>
           </div>
 
           <span>
@@ -73,7 +73,30 @@
 <ng-container *ngIf="gameStarted">
   <div class="active-game-active">
     <div class="header">
-      Game On {{currentUserName}}!!
+      Game On: <i>{{ currentUserName }}</i>!!
     </div>
+
+    <div>
+      This round is led by <i>{{ gameState.currentPlayer }}</i>.
+      <span *ngIf="currentIntervalCountdown > 0">They have {{ currentIntervalCountdown }} seconds to choose the character to be played</span>
+    </div>
+
+    <div class="ws-divider"></div>
+
+    <table
+      tuiTable
+      size="l"
+      [columns]="game.columns">
+<!--      <thead tuiHead>-->
+<!--      <tr tuiThGroup>-->
+<!--        <ng-container *ngFor="let column of game.columns">-->
+<!--          <th-->
+<!--            *tuiHead="column">-->
+<!--            {{ column }}-->
+<!--          </th>-->
+<!--        </ng-container>-->
+<!--      </tr>-->
+<!--      </thead>-->
+    </table>
   </div>
 </ng-container>

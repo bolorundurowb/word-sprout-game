@@ -111,4 +111,21 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         return Ok(mapper.Map<GameRes>(game));
     }
+
+    [HttpGet("{gameCode}/state")]
+    [ProducesResponseType(typeof(GameState), 200)]
+    [ProducesResponseType(typeof(GenericRes), 400)]
+    [ProducesResponseType(typeof(GenericRes), 404)]
+    public async Task<IActionResult> GetGameState(string gameCode)
+    {
+        var game = await Meerkat.FindOneAsync<Game>(x => x.Code == gameCode);
+
+        if (game == null)
+            return NotFound("Game with that code does not exist");
+
+        if (game.Status is not GameStatus.Active)
+            return BadRequest("Only active games can provide state");
+
+        return Ok(game.State);
+    }
 }

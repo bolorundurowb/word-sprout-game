@@ -2,12 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { TuiButton, TuiLoader, TuiTitle } from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JsonPipe, NgForOf, NgIf } from '@angular/common';
+import { JsonPipe, NgForOf, NgIf, NgOptimizedImage, NgStyle } from '@angular/common';
 import { GameService } from '../services/game.service';
 import { ToastService } from '../services/toast.service';
 import { GameRealTimeService } from '../services/game-rt.service';
 import { TuiChip } from '@taiga-ui/kit';
 import { UserService } from '../services/user.service';
+import { TuiTable } from '@taiga-ui/addon-table';
 
 @Component({
   selector: 'ws-active-game',
@@ -19,7 +20,10 @@ import { UserService } from '../services/user.service';
     TuiChip,
     NgIf,
     TuiButton,
-    TuiLoader
+    TuiLoader,
+    TuiTable,
+    NgStyle,
+    NgOptimizedImage,
   ],
   templateUrl: 'active-game.component.html',
   styleUrl: 'active-game.component.scss'
@@ -31,6 +35,7 @@ export class ActiveGameComponent implements OnInit {
   private readonly gameService = inject(GameService);
   private readonly userService = inject(UserService);
 
+  avatarColors = ['#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99'];
   gameCode: string = '';
   joinGameUrl: string = '';
   game: any = {};
@@ -48,6 +53,10 @@ export class ActiveGameComponent implements OnInit {
 
   constructor(title: Title) {
     title.setTitle('Active Game | Word Sprout');
+  }
+
+  avatarColour(index: number): string {
+    return this.avatarColors[index % this.avatarColors.length];
   }
 
   async ngOnInit() {
@@ -68,6 +77,12 @@ export class ActiveGameComponent implements OnInit {
       }
 
       this.userInitiatedGame = this.game.initiatedBy === currentUserName;
+      this.gameStarted = this.game.status === 'Active';
+
+      // if game status is active get the current state
+      if (this.gameStarted) {
+        this.gameState = await this.gameService.getState(this.gameCode);
+      }
 
       // set up the real time service
       this.gameRtService = new GameRealTimeService(this.gameCode);
