@@ -1,4 +1,4 @@
-import { Component, inject, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnChanges, OnInit, signal, SimpleChanges, ViewChild } from '@angular/core';
 import { TuiButton, TuiDialogContext, TuiDialogService, TuiLoader, TuiTitle } from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -44,11 +44,11 @@ export class ActiveGameComponent implements OnInit {
   avatarColors = [ '#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99' ];
   gameCode: string = '';
   joinGameUrl: string = '';
-  game: any = {};
+  game = signal({} as any);
 
-  currentUserName: string = '';
-  isGameActive = this.game.status === this.GAME_ACTIVE;
-  isGameAdmin = this.game.initiatedBy === this.currentUserName;
+  currentUserName = signal('');
+  isGameActive = computed(() => this.game().status === this.GAME_ACTIVE);
+  isGameAdmin = computed(() => this.game().initiatedBy === this.currentUserName());
   isLoading = false;
 
   currentIntervalCountdown = 0;
@@ -63,12 +63,12 @@ export class ActiveGameComponent implements OnInit {
   async ngOnInit() {
     try {
       this.gameCode = this.parseGameCode();
-      this.currentUserName = this.getCurrentUsername();
+      this.currentUserName.set(this.getCurrentUsername());
       this.joinGameUrl = this.composeJoinUrl();
-      this.game = await this.getAndValidateGame();
+      this.game.set(await this.getAndValidateGame());
 
       // if game status is active get the current state
-      if (this.isGameActive) {
+      if (this.isGameActive()) {
         const gameState = await this.gameService.getState(this.gameCode);
         this.setGameState(gameState);
       }
@@ -92,7 +92,7 @@ export class ActiveGameComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      this.game = await this.gameService.start(this.gameCode);
+      this.game.set(await this.gameService.start(this.gameCode));
     } catch (e) {
       this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
     } finally {
@@ -102,14 +102,6 @@ export class ActiveGameComponent implements OnInit {
 
   avatarColour(index: number): string {
     return this.avatarColors[index % this.avatarColors.length];
-  }
-
-  evaluateCurrentPlayer() {
-    const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName;
-
-    if (isCurrentPlayer) {
-      this.showChooseCharacterModal();
-    }
   }
 
   showChooseCharacterModal() {
@@ -147,9 +139,9 @@ export class ActiveGameComponent implements OnInit {
   }
 
   private async getAndValidateGame(): Promise<any> {
-    const game = (await this.gameService.getByCode(this.gameCode) )as any;
+    const game = (await this.gameService.getByCode(this.gameCode)) as any;
 
-    if (!game.players.some((x: { userName: string; }) => x.userName === this.currentUserName)) {
+    if (!game.players.some((x: { userName: string; }) => x.userName === this.currentUserName())) {
       throw new Error('You are not a player in this game');
     }
 
@@ -158,7 +150,7 @@ export class ActiveGameComponent implements OnInit {
 
   private setGameState(gameState: any) {
     this.gameState = gameState;
-    const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName;
+    const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName();
 
     if (isCurrentPlayer) {
       this.showChooseCharacterModal();
@@ -167,17 +159,19 @@ export class ActiveGameComponent implements OnInit {
 
   private addRtListeners(rtService: GameRealTimeService) {
     rtService.playerJoined().subscribe(userName => {
-      this.game.players.push({ userName });
+      this.game.update(game => {
+        game.players.push({ userName });
+        return game;
+      });
     });
     rtService.gameStarted().subscribe(() => {
-      this.game.status = 'Active';
-      this.isGameActive = true;
+      this.game.update(game => ({ ...game, status: this.GAME_ACTIVE }));
     });
 
     rtService.roundCountdownInitiated().subscribe(currentPlayer => {
-      this.setGameState({...this.gameState, currentPlayer});
+      this.setGameState({ ...this.gameState, currentPlayer });
 
-      this.currentIntervalCountdown = this.game.maxIntervalBetweenRoundsInSecs;
+      this.currentIntervalCountdown = this.game().maxIntervalBetweenRoundsInSecs;
       const intervalId = setInterval(() => {
         this.currentIntervalCountdown -= 1;
         if (this.currentIntervalCountdown === 0) {

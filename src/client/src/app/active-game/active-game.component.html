@@ -22,7 +22,7 @@
     <div class="section-prompt">Players:</div>
 
     <div class="players-container">
-      <ng-container *ngFor="let player of game.players; let i = index">
+      <ng-container *ngFor="let player of game().players; let i = index">
         <div class="player">
           <div class="avatar" [ngStyle]="{'background-color': avatarColour(i)}">
             <img ngSrc="/icons/user.png" height="512" width="512" alt="Generic game player avatar"/>
@@ -32,7 +32,7 @@
             {{ player.userName }}
           </span>
 
-          <ng-container *ngIf="player.userName === game.initiatedBy">
+          <ng-container *ngIf="player.userName === game().initiatedBy">
             <tui-chip
               size="xs"
               appearance="admin">
@@ -40,7 +40,7 @@
             </tui-chip>
           </ng-container>
 
-          <ng-container *ngIf="player.userName === currentUserName">
+          <ng-container *ngIf="player.userName === currentUserName()">
             <tui-chip
               size="xs"
               appearance="user">
@@ -56,7 +56,7 @@
     <div class="action">
       <ng-container *ngIf="isGameAdmin">
         <button class="ws-button"
-                [disabled]="game.players?.length < 2"
+                [disabled]="game().players?.length < 2"
                 (click)="startGame()">
           <tui-loader [showLoader]="isLoading">
             Start Game
@@ -73,7 +73,7 @@
 <ng-container *ngIf="isGameActive">
   <div class="active-game-active">
     <div class="header">
-      Game On: <i>{{ currentUserName }}</i>!!
+      Game On: <i>{{ currentUserName() }}</i>!!
     </div>
 
     <div>
@@ -89,7 +89,7 @@
         <th class="char">
           Character
         </th>
-        <ng-container *ngFor="let column of game.columns">
+        <ng-container *ngFor="let column of game().columns">
           <th>
             {{ column }}
           </th>
@@ -100,11 +100,11 @@
       </tr>
       </thead>
       <tbody>
-      <ng-container *ngFor="let char of game.characterSet">
+      <ng-container *ngFor="let char of game().characterSet">
         <tr wsGameRoundRow
             [character]="char"
             [currentCharacter]="gameState.character"
-            [columns]="game.columns"></tr>
+            [columns]="game().columns"></tr>
       </ng-container>
       </tbody>
     </table>
