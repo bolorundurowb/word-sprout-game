@@ -1,5 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { TuiButton, TuiLoader, TuiTitle } from '@taiga-ui/core';
+import { Component, inject, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { TuiButton, TuiDialogContext, TuiDialogService, TuiLoader, TuiTitle } from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JsonPipe, NgForOf, NgIf, NgOptimizedImage, NgStyle } from '@angular/common';
@@ -9,6 +9,7 @@ import { GameRealTimeService } from '../services/game-rt.service';
 import { TuiChip } from '@taiga-ui/kit';
 import { UserService } from '../services/user.service';
 import { GameRoundRowComponent } from '../components/game-round-row.component';
+import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 
 @Component({
   selector: 'ws-active-game',
@@ -29,23 +30,27 @@ import { GameRoundRowComponent } from '../components/game-round-row.component';
   styleUrl: 'active-game.component.scss'
 })
 export class ActiveGameComponent implements OnInit {
+  GAME_ACTIVE = 'Active';
+
   private readonly toasts = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly gameService = inject(GameService);
   private readonly userService = inject(UserService);
+  private readonly dialogs = inject(TuiDialogService);
 
-  avatarColors = ['#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99'];
+  @ViewChild('chooseCharacter') chooseCharacterTemplate: PolymorpheusContent<TuiDialogContext> | null = null;
+
+  avatarColors = [ '#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99' ];
   gameCode: string = '';
   joinGameUrl: string = '';
   game: any = {};
-  gameRtService?: GameRealTimeService;
 
   currentUserName: string = '';
-  userInitiatedGame = false;
+  isGameActive = this.game.status === this.GAME_ACTIVE;
+  isGameAdmin = this.game.initiatedBy === this.currentUserName;
   isLoading = false;
 
-  gameStarted = false;
   currentIntervalCountdown = 0;
   currentRoundCountdown = 0;
   gameState: any = {};
@@ -55,55 +60,23 @@ export class ActiveGameComponent implements OnInit {
     title.setTitle('Active Game | Word Sprout');
   }
 
-  avatarColour(index: number): string {
-    return this.avatarColors[index % this.avatarColors.length];
-  }
-
   async ngOnInit() {
     try {
-      this.gameCode = this.route.snapshot.paramMap.get('gameCode')!;
-      const currentUserName = this.userService.getUsername();
-
-      if (!currentUserName) {
-        throw new Error('You do not have a configured user name');
-      }
-
-      this.currentUserName = currentUserName;
-      this.joinGameUrl = `${location.origin}/games/join?code=${this.gameCode}`;
-      this.game = await this.gameService.getByCode(this.gameCode);
-
-      if (!this.game.players.some((x: { userName: string; }) => x.userName === currentUserName)) {
-        throw new Error('You are not a player in this game');
-      }
-
-      this.userInitiatedGame = this.game.initiatedBy === currentUserName;
-      this.gameStarted = this.game.status === 'Active';
+      this.gameCode = this.parseGameCode();
+      this.currentUserName = this.getCurrentUsername();
+      this.joinGameUrl = this.composeJoinUrl();
+      this.game = await this.getAndValidateGame();
 
       // if game status is active get the current state
-      if (this.gameStarted) {
-        this.gameState = await this.gameService.getState(this.gameCode);
+      if (this.isGameActive) {
+        const gameState = await this.gameService.getState(this.gameCode);
+        this.setGameState(gameState);
       }
 
       // set up the real time service
-      this.gameRtService = new GameRealTimeService(this.gameCode);
-      await this.gameRtService.init();
-      this.gameRtService.playerJoined().subscribe(userName => {
-        this.game.players.push({ userName });
-      });
-      this.gameRtService.gameStarted().subscribe(() => {
-        this.game.status = 'Active';
-        this.gameStarted = true;
-      });
-      this.gameRtService.roundCountdownInitiated().subscribe(currentPlayer => {
-        this.gameState.currentPlayer = currentPlayer;
-        this.currentIntervalCountdown = this.game.maxIntervalBetweenRoundsInSecs;
-        const intervalId = setInterval(() => {
-          this.currentIntervalCountdown -= 1;
-          if (this.currentIntervalCountdown === 0) {
-            clearInterval(intervalId);
-          }
-        }, 1000);
-      });
+      const gameRtService = new GameRealTimeService(this.gameCode);
+      await gameRtService.init();
+      this.addRtListeners(gameRtService);
     } catch (e) {
       this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
       await this.router.navigate([ '/' ]);
@@ -125,5 +98,92 @@ export class ActiveGameComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  avatarColour(index: number): string {
+    return this.avatarColors[index % this.avatarColors.length];
+  }
+
+  evaluateCurrentPlayer() {
+    const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName;
+
+    if (isCurrentPlayer) {
+      this.showChooseCharacterModal();
+    }
+  }
+
+  showChooseCharacterModal() {
+    this.dialogs.open(
+      this.chooseCharacterTemplate,
+      {
+        dismissible: false,
+        closeable: false
+      }
+    ).subscribe();
+  }
+
+  private parseGameCode(): string {
+    const gameCode = this.route.snapshot.paramMap.get('gameCode');
+
+    if (!gameCode) {
+      throw new Error('No game code configured');
+    }
+
+    return gameCode;
+  }
+
+  private getCurrentUsername(): string {
+    const currentUserName = this.userService.getUsername();
+
+    if (!currentUserName) {
+      throw new Error('You do not have a configured user name');
+    }
+
+    return currentUserName;
+  }
+
+  private composeJoinUrl(): string {
+    return `${location.origin}/games/join?code=${this.gameCode}`;
+  }
+
+  private async getAndValidateGame(): Promise<any> {
+    const game = (await this.gameService.getByCode(this.gameCode) )as any;
+
+    if (!game.players.some((x: { userName: string; }) => x.userName === this.currentUserName)) {
+      throw new Error('You are not a player in this game');
+    }
+
+    return game;
+  }
+
+  private setGameState(gameState: any) {
+    this.gameState = gameState;
+    const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName;
+
+    if (isCurrentPlayer) {
+      this.showChooseCharacterModal();
+    }
+  }
+
+  private addRtListeners(rtService: GameRealTimeService) {
+    rtService.playerJoined().subscribe(userName => {
+      this.game.players.push({ userName });
+    });
+    rtService.gameStarted().subscribe(() => {
+      this.game.status = 'Active';
+      this.isGameActive = true;
+    });
+
+    rtService.roundCountdownInitiated().subscribe(currentPlayer => {
+      this.setGameState({...this.gameState, currentPlayer});
+
+      this.currentIntervalCountdown = this.game.maxIntervalBetweenRoundsInSecs;
+      const intervalId = setInterval(() => {
+        this.currentIntervalCountdown -= 1;
+        if (this.currentIntervalCountdown === 0) {
+          clearInterval(intervalId);
+        }
+      }, 1000);
+    });
   }
 }

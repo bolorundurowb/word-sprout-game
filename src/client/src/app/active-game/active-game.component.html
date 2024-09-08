@@ -1,4 +1,4 @@
-<ng-container *ngIf="!gameStarted">
+<ng-container *ngIf="!isGameActive">
   <div class="active-game-awaiting">
     <div class="header">
       Game On: Awaiting Players
@@ -54,7 +54,7 @@
     <div class="ws-divider"></div>
 
     <div class="action">
-      <ng-container *ngIf="userInitiatedGame">
+      <ng-container *ngIf="isGameAdmin">
         <button class="ws-button"
                 [disabled]="game.players?.length < 2"
                 (click)="startGame()">
@@ -63,14 +63,14 @@
           </tui-loader>
         </button>
       </ng-container>
-      <ng-container *ngIf="!userInitiatedGame">
+      <ng-container *ngIf="!isGameAdmin">
         <div>Ask the game admin to start the game</div>
       </ng-container>
     </div>
   </div>
 </ng-container>
 
-<ng-container *ngIf="gameStarted">
+<ng-container *ngIf="isGameActive">
   <div class="active-game-active">
     <div class="header">
       Game On: <i>{{ currentUserName }}</i>!!
@@ -110,3 +110,7 @@
     </table>
   </div>
 </ng-container>
+
+<ng-template #chooseCharacter let-observer>
+  <div>Hello</div>
+</ng-template>
