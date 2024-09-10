@@ -67,6 +67,7 @@ export class ActiveGameComponent implements OnInit {
   isLoading = false;
 
   currentIntervalCountdown = 0;
+  currentIntervalCountdownIntervalId?: any;
   currentRoundCountdown = 0;
   gameState: any = {};
 
@@ -127,6 +128,7 @@ export class ActiveGameComponent implements OnInit {
 
     try {
       await this.gameService.startRound(this.gameCode, this.characterControl.value!, this.currentUserName());
+      clearInterval(this.currentIntervalCountdownIntervalId);
       this.isCharacterSelectionModalVisible = false;
     } catch (e) {
       this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
@@ -211,12 +213,25 @@ export class ActiveGameComponent implements OnInit {
       this.setGameState({ ...this.gameState, currentPlayer });
 
       this.currentIntervalCountdown = this.game().maxIntervalBetweenRoundsInSecs;
-      const intervalId = setInterval(() => {
+      this.currentIntervalCountdownIntervalId = setInterval(() => {
         this.currentIntervalCountdown -= 1;
         if (this.currentIntervalCountdown === 0) {
-          clearInterval(intervalId);
+          this.characterControl.setValue(this.getRandomElement(this.availableCharacters));
+          this.startRound()
+            .then(() => {
+              console.log('Round started after timeout');
+            });
         }
       }, 1000);
     });
+  }
+
+  private getRandomElement<T>(array: T[]): T {
+    if (array.length === 0) {
+      throw new Error('Array is empty.');
+    }
+
+    const randomIndex = Math.floor(Math.random() * array.length);
+    return array[randomIndex];
   }
 }
