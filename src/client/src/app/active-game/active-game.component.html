@@ -111,6 +111,40 @@
   </div>
 </ng-container>
 
-<ng-template #chooseCharacter let-observer>
-  <div>Hello</div>
+<ng-template let-observer
+             [(tuiDialog)]="isCharacterSelectionModalVisible">
+  <div class="modal">
+    <div class="header">Choose Round Character</div>
+    <div class="preamble">
+      Choose the character for this round. You have to make a choice in
+      <span>{{ currentIntervalCountdown }}</span>
+      seconds otherwise a random choice will be made for you
+    </div>
+
+    <form>
+      <tui-select
+        tuiTextfieldSize="m"
+        [formControl]="characterControl">
+        Character
+        <input
+          tuiTextfieldLegacy
+          name="ws-round-character"/>
+        <tui-data-list-wrapper
+          *tuiDataList
+          [items]="availableCharacters"/>
+      </tui-select>
+
+      <div class="actions">
+        <button
+          type="submit"
+          class="ws-button"
+          [disabled]="characterControl.invalid || isLoading"
+          (click)="startRound()">
+          <tui-loader [showLoader]="isLoading">
+            Start Round
+          </tui-loader>
+        </button>
+      </div>
+    </form>
+  </div>
 </ng-template>

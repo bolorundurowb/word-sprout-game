@@ -35,4 +35,11 @@ export class GameService {
   getState(gameCode: string) {
     return firstValueFrom(this.http.get(`${this.BASE_API}/${gameCode}/state`));
   }
+
+  startRound(gameCode: string, character: string, userName: string) {
+    return firstValueFrom(this.http.post(`${this.BASE_API}/${gameCode}/start-round`, {
+      character,
+      playerUserName: userName
+    }));
+  }
 }

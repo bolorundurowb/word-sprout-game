@@ -1,15 +1,24 @@
 import { Component, computed, inject, OnChanges, OnInit, signal, SimpleChanges, ViewChild } from '@angular/core';
-import { TuiButton, TuiDialogContext, TuiDialogService, TuiLoader, TuiTitle } from '@taiga-ui/core';
+import {
+  TuiButton, TuiDataList, TuiDialog,
+  TuiDialogContext,
+  TuiDialogService,
+  TuiLoader,
+  TuiTextfieldOptionsDirective,
+  TuiTitle
+} from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JsonPipe, NgForOf, NgIf, NgOptimizedImage, NgStyle } from '@angular/common';
 import { GameService } from '../services/game.service';
 import { ToastService } from '../services/toast.service';
 import { GameRealTimeService } from '../services/game-rt.service';
-import { TuiChip } from '@taiga-ui/kit';
+import { TuiChip, TuiDataListWrapper } from '@taiga-ui/kit';
 import { UserService } from '../services/user.service';
 import { GameRoundRowComponent } from '../components/game-round-row.component';
 import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
+import { TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'ws-active-game',
@@ -25,6 +34,12 @@ import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
     NgStyle,
     NgOptimizedImage,
     GameRoundRowComponent,
+    TuiSelectModule,
+    TuiTextfieldControllerModule,
+    ReactiveFormsModule,
+    TuiDataListWrapper,
+    TuiDataList,
+    TuiDialog,
   ],
   templateUrl: 'active-game.component.html',
   styleUrl: 'active-game.component.scss'
@@ -54,6 +69,13 @@ export class ActiveGameComponent implements OnInit {
   currentIntervalCountdown = 0;
   currentRoundCountdown = 0;
   gameState: any = {};
+
+  // state for the round selection modal
+  isCharacterSelectionModalVisible = false;
+  availableCharacters: string[] = [];
+  characterControl = new FormControl<string>('', [
+    Validators.required
+  ]);
 
 
   constructor(title: Title) {
@@ -100,18 +122,30 @@ export class ActiveGameComponent implements OnInit {
     }
   }
 
+  async startRound() {
+    this.isLoading = true;
+
+    try {
+      await this.gameService.startRound(this.gameCode, this.characterControl.value!, this.currentUserName());
+      this.isCharacterSelectionModalVisible = false;
+    } catch (e) {
+      this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   avatarColour(index: number): string {
     return this.avatarColors[index % this.avatarColors.length];
   }
 
   showChooseCharacterModal() {
-    this.dialogs.open(
-      this.chooseCharacterTemplate,
-      {
-        dismissible: false,
-        closeable: false
-      }
-    ).subscribe();
+    // reset state fields
+    this.characterControl.reset();
+    this.availableCharacters = this.game().characterSet
+      .filter((x: string) => !this.gameState.playedCharacters.includes(x));
+
+    this.isCharacterSelectionModalVisible = true;
   }
 
   private parseGameCode(): string {
@@ -158,16 +192,21 @@ export class ActiveGameComponent implements OnInit {
   }
 
   private addRtListeners(rtService: GameRealTimeService) {
+    // update players list when a new one joins
     rtService.playerJoined().subscribe(userName => {
       this.game.update(game => {
         game.players.push({ userName });
         return game;
       });
     });
+
+    // indicate that the game has started
     rtService.gameStarted().subscribe(() => {
       this.game.update(game => ({ ...game, status: this.GAME_ACTIVE }));
+      this.setGameState({ playedCharacters: [] });
     });
 
+    // trigger the countdown as well as the player to choose c character
     rtService.roundCountdownInitiated().subscribe(currentPlayer => {
       this.setGameState({ ...this.gameState, currentPlayer });
 
