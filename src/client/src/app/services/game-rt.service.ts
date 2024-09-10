@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import * as signalr from '@microsoft/signalr';
 import { Observable } from 'rxjs';
 
@@ -43,6 +42,16 @@ export class GameRealTimeService {
       this.hubConnection.on('RoundCountdownInitiated', (gameCode: string, currentPlayerUserName: string) => {
         if (gameCode === this.gameCode) {
           observer.next(currentPlayerUserName);
+        }
+      });
+    });
+  }
+
+  roundStarted(): Observable<any> {
+    return new Observable(observer => {
+      this.hubConnection.on('RoundStarted', (gameCode: string, playerUserName: string, character: string) => {
+        if (gameCode === this.gameCode) {
+          observer.next({ playerUserName, character });
         }
       });
     });

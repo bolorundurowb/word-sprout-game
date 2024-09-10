@@ -1,10 +1,8 @@
-import { Component, computed, inject, OnChanges, OnInit, signal, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import {
   TuiButton, TuiDataList, TuiDialog,
   TuiDialogContext,
-  TuiDialogService,
   TuiLoader,
-  TuiTextfieldOptionsDirective,
   TuiTitle
 } from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
@@ -18,7 +16,7 @@ import { UserService } from '../services/user.service';
 import { GameRoundRowComponent } from '../components/game-round-row.component';
 import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 import { TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
-import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'ws-active-game',
@@ -52,7 +50,6 @@ export class ActiveGameComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly gameService = inject(GameService);
   private readonly userService = inject(UserService);
-  private readonly dialogs = inject(TuiDialogService);
 
   @ViewChild('chooseCharacter') chooseCharacterTemplate: PolymorpheusContent<TuiDialogContext> | null = null;
 
@@ -64,12 +61,12 @@ export class ActiveGameComponent implements OnInit {
   currentUserName = signal('');
   isGameActive = computed(() => this.game().status === this.GAME_ACTIVE);
   isGameAdmin = computed(() => this.game().initiatedBy === this.currentUserName());
+  gameState: any = {};
   isLoading = false;
 
+  // interval state details
   currentIntervalCountdown = 0;
   currentIntervalCountdownIntervalId?: any;
-  currentRoundCountdown = 0;
-  gameState: any = {};
 
   // state for the round selection modal
   isCharacterSelectionModalVisible = false;
@@ -77,6 +74,10 @@ export class ActiveGameComponent implements OnInit {
   characterControl = new FormControl<string>('', [
     Validators.required
   ]);
+
+  // round state details
+  roundOver?: boolean;
+  currentRoundCountdown = 0;
 
 
   constructor(title: Title) {
@@ -135,6 +136,8 @@ export class ActiveGameComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+
+    return false;
   }
 
   avatarColour(index: number): string {
@@ -187,8 +190,9 @@ export class ActiveGameComponent implements OnInit {
   private setGameState(gameState: any) {
     this.gameState = gameState;
     const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName();
+    const roundInProgress = this.gameState.currentCharacter && !this.gameState.playedCharacters.includes(this.gameState.currentCharacter);
 
-    if (isCurrentPlayer) {
+    if (isCurrentPlayer && !roundInProgress) {
       this.showChooseCharacterModal();
     }
   }
@@ -221,6 +225,19 @@ export class ActiveGameComponent implements OnInit {
             .then(() => {
               console.log('Round started after timeout');
             });
+        }
+      }, 1000);
+    });
+
+    // trigger the countdown for the game round
+    rtService.roundStarted().subscribe(({playerUserName, character}) => {
+      this.setGameState({ ...this.gameState, currentPlayer: playerUserName, currentCharacter: character});
+
+      this.currentRoundCountdown = this.game().maxRoundDurationInSecs;
+      const currentRoundCountdownIntervalId = setInterval(() => {
+        this.currentRoundCountdown -= 1;
+        if (this.currentRoundCountdown === 0) {
+          clearInterval(currentRoundCountdownIntervalId);
         }
       }, 1000);
     });
