@@ -104,6 +104,29 @@
         }
       }
     }
+
+    tbody {
+      tr {
+        &.played-row {
+          background-color: #e0e0e0;
+          color: #999;
+          pointer-events: none;
+          opacity: 0.6;
+        }
+
+        &.disabled-row {
+          background-color: #f0f0f0;
+          pointer-events: none;
+          opacity: 0.6;
+        }
+
+        td {
+          button {
+            background-color: #86005F !important;
+          }
+        }
+      }
+    }
   }
 }
 

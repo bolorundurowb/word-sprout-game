@@ -7,7 +7,7 @@ import {
 } from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JsonPipe, NgForOf, NgIf, NgOptimizedImage, NgStyle } from '@angular/common';
+import { JsonPipe, NgClass, NgForOf, NgIf, NgOptimizedImage, NgStyle } from '@angular/common';
 import { GameService } from '../services/game.service';
 import { ToastService } from '../services/toast.service';
 import { GameRealTimeService } from '../services/game-rt.service';
@@ -38,6 +38,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
     TuiDataListWrapper,
     TuiDataList,
     TuiDialog,
+    NgClass,
   ],
   templateUrl: 'active-game.component.html',
   styleUrl: 'active-game.component.scss'
@@ -241,6 +242,15 @@ export class ActiveGameComponent implements OnInit {
         }
       }, 1000);
     });
+  }
+
+  protected isRowPlayed(character: string): boolean {
+    return this.gameState.playedCharacters?.includes(character) ?? false;
+  }
+
+  protected isRowPlayable(character: string): boolean {
+    return character === this.gameState.currentCharacter;
+    // return !this.roundOver && character === this.gameState.currentCharacter
   }
 
   private getRandomElement<T>(array: T[]): T {

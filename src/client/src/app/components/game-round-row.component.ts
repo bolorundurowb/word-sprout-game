@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgForOf } from '@angular/common';
 import { TuiInputModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { TuiTextfieldOptionsDirective } from '@taiga-ui/core';
+import { FormsModule } from '@angular/forms';
 
 export interface GameRoundData {
   character: string;
   score?: number;
-  entries?: Record<string, string>;
+  entries: Record<string, string>;
 }
 
 @Component({
@@ -17,6 +18,7 @@ export interface GameRoundData {
     TuiInputModule,
     TuiTextfieldOptionsDirective,
     TuiTextfieldControllerModule,
+    FormsModule,
   ],
   template: `
     <td>{{ character }}</td>
@@ -24,6 +26,7 @@ export interface GameRoundData {
       <td>
         <tui-input
           tuiTextfieldSize="m"
+          [(ngModel)]="data.entries[column]"
           [tuiTextfieldLabelOutside]="true">
           <input
             name="ws-gr-{{column}}"
@@ -31,7 +34,6 @@ export interface GameRoundData {
             [disabled]="!enabled"
             (drop)="disableEvent($event)"
             (paste)="disableEvent($event)"
-            (change)="inputChanged($event)"
           />
         </tui-input>
       </td>
@@ -39,6 +41,7 @@ export interface GameRoundData {
     <td>
       {{ score }}
     </td>
+    <ng-content></ng-content>
   `,
   styles: `
     td {
@@ -50,16 +53,18 @@ export class GameRoundRowComponent {
   @Input() columns: string[] = [];
   @Input() character: string = '';
   @Input() score?: number;
-  @Input() currentCharacter?: string;
+  @Input() enabled = true;
 
   // @ts-ignore
   @Input() data: GameRoundData;
   @Output() dataChange = new EventEmitter<GameRoundData>();
 
-  enabled = this.character === this.currentCharacter;
-
-  inputChanged(event: any) {
-    console.log(event);
+  constructor() {
+    this.data = {
+      character: this.character,
+      score: this.score,
+      entries: {}
+    };
   }
 
   disableEvent(event: any) {

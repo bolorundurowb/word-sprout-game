@@ -97,14 +97,27 @@
         <th class="score">
           Score
         </th>
+        <th class="score">
+        </th>
       </tr>
       </thead>
       <tbody>
       <ng-container *ngFor="let char of game().characterSet">
         <tr wsGameRoundRow
+            [ngClass]="{'disabled-row': !isRowPlayable(char), 'played-row': isRowPlayed(char)}"
             [character]="char"
-            [currentCharacter]="gameState.character"
-            [columns]="game().columns"></tr>
+            [columns]="game().columns"
+            [enabled]="isRowPlayable(char)">
+          <td>
+            <ng-container *ngIf="isRowPlayable(char)">
+              <button
+                tuiIconButton
+                size="m"
+                iconStart="@tui.send-horizontal">
+              </button>
+            </ng-container>
+          </td>
+        </tr>
       </ng-container>
       </tbody>
     </table>
