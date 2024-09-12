@@ -151,6 +151,20 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         var play = player.AddPlay(req.Character, req.ColumnValues);
         await game.SaveAsync();
+        
+        // if the play is submitted by the current player, then the round is over
+        if (game.State!.CurrentPlayer == userName)
+        {
+            var playMap = new Dictionary<string, Play>();
+
+            foreach (var gamePlayer in game.Players)
+            {
+                var playerPlay = gamePlayer.Plays.First(x => x.Character == req.Character);
+                playMap.Add(gamePlayer.UserName, playerPlay);
+            }
+            
+            await gameHub.Clients.All.RoundEnded(gameCode, playMap);
+        }
 
         return Ok(play);
     }

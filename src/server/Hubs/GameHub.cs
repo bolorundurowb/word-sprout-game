@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using WordSproutApi.Models;
 
 namespace WordSproutApi.Hubs;
 
@@ -11,6 +12,8 @@ public interface IGameHubClient
     Task RoundCountdownInitiated(string gameCode, string turnUsername);
 
     Task RoundStarted(string gameCode, string turnUsername, char character);
+
+    Task RoundEnded(string gameCode, Dictionary<string, Play> plays);
 }
 
 public class GameHub : Hub<IGameHubClient>
@@ -25,4 +28,7 @@ public class GameHub : Hub<IGameHubClient>
 
     public async Task RoundStarted(string gameCode, string turnUsername, char character) =>
         await Clients.All.RoundStarted(gameCode, turnUsername, character);
+
+    public async Task RoundEnded(string gameCode, Dictionary<string, Play> plays) =>
+        await Clients.All.RoundEnded(gameCode, plays);
 }
