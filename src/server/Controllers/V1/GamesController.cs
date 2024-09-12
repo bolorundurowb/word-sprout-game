@@ -128,4 +128,30 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         return Ok(game.State);
     }
+
+    [HttpGet("{gameCode}/players/{userName}/plays")]
+    [ProducesResponseType(typeof(Play), 200)]
+    [ProducesResponseType(typeof(GenericRes), 400)]
+    [ProducesResponseType(typeof(GenericRes), 401)]
+    [ProducesResponseType(typeof(GenericRes), 404)]
+    public async Task<IActionResult> SubmitPLay(string gameCode, string userName, [FromBody] SubmitPlayReq req)
+    {
+        var game = await Meerkat.FindOneAsync<Game>(x => x.Code == gameCode);
+
+        if (game == null)
+            return NotFound("Game with that code does not exist");
+
+        if (game.Status is not GameStatus.Active)
+            return BadRequest("Only active games can accept plays");
+
+        var player = game.Players.FirstOrDefault(x => x.UserName == userName);
+
+        if (player == null)
+            return Unauthorized();
+
+        var play = player.AddPlay(req.Character, req.ColumnValues);
+        await game.SaveAsync();
+
+        return Ok(play);
+    }
 }
