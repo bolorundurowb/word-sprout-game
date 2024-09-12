@@ -77,6 +77,7 @@ export class ActiveGameComponent implements OnInit {
   ]);
 
   // round state details
+  isRoundSubmissionModalVisible = false;
   roundOver?: boolean;
   currentRoundCountdown = 0;
 
@@ -152,6 +153,14 @@ export class ActiveGameComponent implements OnInit {
       .filter((x: string) => !this.gameState.playedCharacters.includes(x));
 
     this.isCharacterSelectionModalVisible = true;
+  }
+
+  showRoundConfirmationModal() {
+    this.isRoundSubmissionModalVisible = true;
+  }
+
+  dismissRoundConfirmationModal() {
+    this.isRoundSubmissionModalVisible = false;
   }
 
   private parseGameCode(): string {

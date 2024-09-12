@@ -113,7 +113,8 @@
               <button
                 tuiIconButton
                 size="m"
-                iconStart="@tui.send-horizontal">
+                iconStart="@tui.send-horizontal"
+                (click)="showRoundConfirmationModal()">
               </button>
             </ng-container>
           </td>
@@ -159,5 +160,30 @@
         </button>
       </div>
     </form>
+  </div>
+</ng-template>
+
+<ng-template [(tuiDialog)]="isRoundSubmissionModalVisible">
+  <div class="modal">
+    <div class="header">Submit Round Entry</div>
+    <div class="preamble">
+      You still have <span>{{ currentRoundCountdown }}</span>
+      seconds left in this round. Are you sure you want to submit your results now? If you proceed, you will no longer
+      be able to modify them.
+    </div>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="ws-button">
+        Yes, Submit
+      </button>
+      <button
+        type="button"
+        class="ws-button outline"
+        (click)="dismissRoundConfirmationModal()">
+        No, Cancel
+      </button>
+    </div>
   </div>
 </ng-template>
