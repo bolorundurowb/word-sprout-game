@@ -14,4 +14,7 @@ public abstract class BaseApiController : ControllerBase
 
     [NonAction]
     public NotFoundObjectResult NotFound(string message) => NotFound(new GenericRes(message));
+
+    [NonAction]
+    public ForbidResult Forbidden() => new ForbidResult();
 }

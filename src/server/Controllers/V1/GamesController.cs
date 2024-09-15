@@ -84,7 +84,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         // notify the other users that the game is started and the countdown should start
         await gameHub.Clients.All.GameStarted(gameCode);
-        await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State!.CurrentPlayer);
+        await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State.CurrentPlayer);
 
         return Ok(mapper.Map<GameRes>(game));
     }
@@ -129,12 +129,12 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         return Ok(game.State);
     }
 
-    [HttpGet("{gameCode}/players/{userName}/plays")]
+    [HttpPost("{gameCode}/players/{userName}/plays")]
     [ProducesResponseType(typeof(Play), 200)]
     [ProducesResponseType(typeof(GenericRes), 400)]
-    [ProducesResponseType(typeof(GenericRes), 401)]
+    [ProducesResponseType(typeof(GenericRes), 403)]
     [ProducesResponseType(typeof(GenericRes), 404)]
-    public async Task<IActionResult> SubmitPLay(string gameCode, string userName, [FromBody] SubmitPlayReq req)
+    public async Task<IActionResult> SubmitPlay(string gameCode, string userName, [FromBody] SubmitPlayReq req)
     {
         var game = await Meerkat.FindOneAsync<Game>(x => x.Code == gameCode);
 
@@ -147,13 +147,13 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         var player = game.Players.FirstOrDefault(x => x.UserName == userName);
 
         if (player == null)
-            return Unauthorized();
+            return Forbidden();
 
         var play = player.AddPlay(req.Character, req.ColumnValues);
         await game.SaveAsync();
-        
+
         // if the play is submitted by the current player, then the round is over
-        if (game.State!.CurrentPlayer == userName)
+        if (game.State.CurrentPlayer == userName)
         {
             var playMap = new Dictionary<string, Play>();
 
@@ -162,10 +162,47 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
                 var playerPlay = gamePlayer.Plays.First(x => x.Character == req.Character);
                 playMap.Add(gamePlayer.UserName, playerPlay);
             }
-            
+
             await gameHub.Clients.All.RoundEnded(gameCode, playMap);
         }
 
         return Ok(play);
+    }
+
+    [HttpPost("{gameCode}/score-round")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(GenericRes), 400)]
+    [ProducesResponseType(typeof(GenericRes), 403)]
+    [ProducesResponseType(typeof(GenericRes), 404)]
+    public async Task<IActionResult> ScoreRound(string gameCode, [FromBody] ScoreRoundReq req)
+    {
+        var game = await Meerkat.FindOneAsync<Game>(x => x.Code == gameCode);
+
+        if (game == null)
+            return NotFound("Game with that code does not exist");
+
+        if (game.Status is not GameStatus.Active)
+            return BadRequest("Only active games can accept play scores");
+
+        if (game.State.CurrentPlayer != req.Username)
+            return Forbidden();
+
+        foreach (var playerScore in req.PlayerScores)
+        {
+            var player = game.Players.FirstOrDefault(x => x.UserName == playerScore.Key);
+
+            if (player is null)
+                throw new InvalidOperationException($"Player {playerScore.Key} not found in game {gameCode}");
+
+            player.ScorePlay(req.Character, playerScore.Value);
+        }
+
+        game.SetStateForNextRound();
+        await game.SaveAsync();
+
+        // notify the other users that a new round countdown should be started
+        await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State.CurrentPlayer!);
+
+        return Ok();
     }
 }
