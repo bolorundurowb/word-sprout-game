@@ -9,7 +9,7 @@ public class SubmitPlayReqValidator : AbstractValidator<SubmitPlayReq>
     {
         RuleFor(x => x.Character)
             .NotEmpty();
-        
+
         RuleFor(x => x.ColumnValues)
             .NotNull();
     }

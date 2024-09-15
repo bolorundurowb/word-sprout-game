@@ -22,7 +22,7 @@ public class Player
     {
         Plays ??= new List<Play>();
 
-        if (Plays.Any(x => x.Character == character)) 
+        if (Plays.Any(x => x.Character == character))
             throw new InvalidOperationException("Character already played");
 
         var play = new Play(character, columnValues);
@@ -34,10 +34,10 @@ public class Player
     public void ScorePlay(char character, int score)
     {
         var play = Plays.FirstOrDefault(x => x.Character == character);
-        
+
         if (play is null)
             throw new InvalidOperationException("Character has not been played");
-        
+
         play.SetScore(score);
     }
 }

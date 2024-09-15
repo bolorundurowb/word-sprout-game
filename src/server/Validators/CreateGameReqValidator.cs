@@ -10,11 +10,11 @@ public class CreateGameReqValidator : AbstractValidator<CreateGameReq>
         RuleFor(x => x.UserName)
             .NotEmpty()
             .WithMessage("User name is required");
-        
+
         RuleFor(x => x.Columns)
             .NotEmpty()
             .WithMessage("At least one column is required");
-        
+
         RuleFor(x => x.CharacterSet)
             .NotEmpty()
             .WithMessage("Character set is required");

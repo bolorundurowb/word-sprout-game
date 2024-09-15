@@ -7,7 +7,7 @@ namespace WordSproutApi.Utilities;
 
 public class CustomValidationResultFactory : IFluentValidationAutoValidationResultFactory
 {
-    public IActionResult CreateActionResult(ActionExecutingContext context,ValidationProblemDetails? validationProblemDetails)
+    public IActionResult CreateActionResult(ActionExecutingContext context, ValidationProblemDetails? validationProblemDetails)
     {
         var errors = (validationProblemDetails?.Errors
             .Select(x =>
