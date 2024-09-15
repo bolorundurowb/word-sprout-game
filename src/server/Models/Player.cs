@@ -30,4 +30,14 @@ public class Player
 
         return play;
     }
+
+    public void ScorePlay(char character, int score)
+    {
+        var play = Plays.FirstOrDefault(x => x.Character == character);
+        
+        if (play is null)
+            throw new InvalidOperationException("Character has not been played");
+        
+        play.SetScore(score);
+    }
 }

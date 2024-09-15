@@ -2,17 +2,24 @@
 
 public class GameState
 {
-    public char CurrentCharacter { get; set; }
+    public char? CurrentCharacter { get; private set; }
 
-    public List<char> PlayedCharacters { get; set; }
+    public List<char> PlayedCharacters { get; private set; }
 
-    public string CurrentPlayer { get; set; }
+    public string? CurrentPlayer { get; private set; }
 
-    private GameState() { }
+    public GameState() => PlayedCharacters = [];
 
-    public GameState(string initialPlayer)
+    public void SetCurrentPlayer(string userName) => CurrentPlayer = userName;
+
+    public void MarkCharacterAsPlayed()
     {
-        PlayedCharacters = [];
-        CurrentPlayer = initialPlayer;
+        if (CurrentCharacter is null)
+            return;
+
+        PlayedCharacters.Add(CurrentCharacter.Value);
+        CurrentCharacter = null;
     }
+
+    public void SetCurrentCharacter(char character) => CurrentCharacter = character;
 }
