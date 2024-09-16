@@ -200,8 +200,29 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         game.SetStateForNextRound();
         await game.SaveAsync();
 
-        // notify the other users that a new round countdown should be started
-        await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State.CurrentPlayer!);
+        if (game.IsGameOver())
+        {
+            // compute all player scores
+            var playerScores = game.Players
+                .Select(x => new { x.UserName, GameScore = x.Plays.Sum(y => y.Score) })
+                .OrderByDescending(x => x.GameScore)
+                .ToDictionary(x => x.UserName, y => y.GameScore);
+
+            // determine the winners
+            var maxScore = playerScores.Values.Max();
+            var winners = playerScores
+                .Where(pair => pair.Value == maxScore)
+                .Select(x => x.Key)
+                .ToList();
+
+            // notify all users that the game is over and share the winning details
+            await gameHub.Clients.All.GameOver(gameCode, winners, playerScores);
+        }
+        else
+        {
+            // notify the other users that a new round countdown should be started
+            await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State.CurrentPlayer!);
+        }
 
         return Ok();
     }

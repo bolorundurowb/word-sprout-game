@@ -14,6 +14,8 @@ public interface IGameHubClient
     Task RoundStarted(string gameCode, string turnUsername, char character);
 
     Task RoundEnded(string gameCode, Dictionary<string, Play> plays);
+
+    Task GameOver(string gameCode, List<string> winningPlayers, Dictionary<string, int> playerScores);
 }
 
 public class GameHub : Hub<IGameHubClient>
@@ -31,4 +33,7 @@ public class GameHub : Hub<IGameHubClient>
 
     public async Task RoundEnded(string gameCode, Dictionary<string, Play> plays) =>
         await Clients.All.RoundEnded(gameCode, plays);
+
+    public async Task GameOver(string gameCode, List<string> winningPlayers, Dictionary<string, int> playerScores) =>
+        await Clients.All.GameOver(gameCode, winningPlayers, playerScores);
 }

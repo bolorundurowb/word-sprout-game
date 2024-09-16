@@ -24,7 +24,7 @@ public class Game : Schema
 
     public List<Player> Players { get; set; }
 
-    public GameStatus Status { get; set; }
+    public GameStatus Status { get; private set; }
 
     public GameState State { get; set; }
 
@@ -60,16 +60,23 @@ public class Game : Schema
 
     public void StartRound(char character) => State.SetCurrentCharacter(character);
 
-    public string SetStateForNextRound()
+    public void SetStateForNextRound()
     {
         // track the current played character
         State.MarkCharacterAsPlayed();
 
-        // choose next player
-        var currentPlayerIndex = Players.IndexOf(x => x.UserName == State.CurrentPlayer);
-        var nextPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
-        State.SetCurrentPlayer(Players[nextPlayerIndex].UserName);
-
-        return State.CurrentPlayer!;
+        if (IsGameOver())
+        {
+            Status = GameStatus.Completed;
+        }
+        else
+        {
+            // choose next player
+            var currentPlayerIndex = Players.IndexOf(x => x.UserName == State.CurrentPlayer);
+            var nextPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
+            State.SetCurrentPlayer(Players[nextPlayerIndex].UserName);
+        }
     }
+
+    public bool IsGameOver() => !CharacterSet.Except(State.PlayedCharacters).Any();
 }
