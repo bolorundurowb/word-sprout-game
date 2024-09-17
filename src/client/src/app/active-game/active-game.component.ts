@@ -78,8 +78,11 @@ export class ActiveGameComponent implements OnInit {
 
   // round state details
   isRoundSubmissionModalVisible = false;
-  roundOver?: boolean;
   currentRoundCountdown = 0;
+
+  // round over state details
+  isRoundEndedModalVisible = false;
+  roundPlays: Record<string, any> = {};
 
 
   constructor(title: Title) {
@@ -240,8 +243,8 @@ export class ActiveGameComponent implements OnInit {
     });
 
     // trigger the countdown for the game round
-    rtService.roundStarted().subscribe(({playerUserName, character}) => {
-      this.setGameState({ ...this.gameState, currentPlayer: playerUserName, currentCharacter: character});
+    rtService.roundStarted().subscribe(({ playerUserName, character }) => {
+      this.setGameState({ ...this.gameState, currentPlayer: playerUserName, currentCharacter: character });
 
       this.currentRoundCountdown = this.game().maxRoundDurationInSecs;
       const currentRoundCountdownIntervalId = setInterval(() => {
@@ -251,6 +254,16 @@ export class ActiveGameComponent implements OnInit {
         }
       }, 1000);
     });
+
+    // trigger the scoring flow
+    rtService.roundEnded().subscribe((plays) => {
+      this.roundPlays = plays;
+      this.isRoundEndedModalVisible = true;
+    });
+
+    // show the winner details and score breakdown
+    rtService.gameOver().subscribe(({ winningPlayers, playerScores }) => {
+    });
   }
 
   protected isRowPlayed(character: string): boolean {
@@ -258,8 +271,7 @@ export class ActiveGameComponent implements OnInit {
   }
 
   protected isRowPlayable(character: string): boolean {
-    return character === this.gameState.currentCharacter;
-    // return !this.roundOver && character === this.gameState.currentCharacter
+    return this.currentRoundCountdown > 0 && character === this.gameState.currentCharacter;
   }
 
   private getRandomElement<T>(array: T[]): T {

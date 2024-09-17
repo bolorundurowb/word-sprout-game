@@ -56,4 +56,24 @@ export class GameRealTimeService {
       });
     });
   }
+
+  roundEnded(): Observable<any> {
+    return new Observable(observer => {
+      this.hubConnection.on('RoundEnded', (gameCode: string, plays: Record<string, any>) => {
+        if (gameCode === this.gameCode) {
+          observer.next(plays);
+        }
+      });
+    });
+  }
+
+  gameOver(): Observable<any> {
+    return new Observable(observer => {
+      this.hubConnection.on('GameOver', (gameCode: string, winningPlayers: Array<string>, playerScores: Record<string, number>) => {
+        if (gameCode === this.gameCode) {
+          observer.next({winningPlayers, playerScores});
+        }
+      });
+    });
+  }
 }
