@@ -62,6 +62,7 @@ export class ActiveGameComponent implements OnInit {
   currentUserName = signal('');
   isGameActive = computed(() => this.game().status === this.GAME_ACTIVE);
   isGameAdmin = computed(() => this.game().initiatedBy === this.currentUserName());
+  isRoundComptroller = computed(() => this.currentUserName() === this.gameState.currentPLayer);
   gameState: any = {};
   isLoading = false;
 
