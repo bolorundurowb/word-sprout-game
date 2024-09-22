@@ -80,6 +80,7 @@ export class ActiveGameComponent implements OnInit {
   // round state details
   isRoundSubmissionModalVisible = false;
   currentRoundCountdown = 0;
+  roundEntry: any;
 
   // round over state details
   isRoundEndedModalVisible = false;
@@ -144,6 +145,10 @@ export class ActiveGameComponent implements OnInit {
     }
 
     return false;
+  }
+
+  async submitRound() {
+
   }
 
   avatarColour(index: number): string {

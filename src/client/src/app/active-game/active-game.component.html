@@ -107,7 +107,8 @@
             [ngClass]="{'disabled-row': !isRowPlayable(char), 'played-row': isRowPlayed(char)}"
             [character]="char"
             [columns]="game().columns"
-            [enabled]="isRowPlayable(char)">
+            [enabled]="isRowPlayable(char)"
+            [(data)]="roundEntry">
           <td>
             <ng-container *ngIf="isRowPlayable(char)">
               <button

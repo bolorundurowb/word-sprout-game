@@ -42,4 +42,13 @@ export class GameService {
       playerUserName: userName
     }));
   }
+
+  submitRound(gameCode: string, userName: string, character: string, entries: any) {
+    return firstValueFrom(
+      this.http.post(`${this.BASE_API}/${gameCode}/players/${userName}/play`, {
+        character,
+        columnValues: entries
+      })
+    );
+  }
 }
