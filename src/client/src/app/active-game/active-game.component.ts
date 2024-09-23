@@ -7,7 +7,7 @@ import {
 } from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JsonPipe, NgClass, NgForOf, NgIf, NgOptimizedImage, NgStyle } from '@angular/common';
+import { JsonPipe, KeyValuePipe, NgClass, NgForOf, NgIf, NgOptimizedImage, NgStyle } from '@angular/common';
 import { GameService } from '../services/game.service';
 import { ToastService } from '../services/toast.service';
 import { GameRealTimeService } from '../services/game-rt.service';
@@ -17,6 +17,7 @@ import { GameRoundRowComponent } from '../components/game-round-row.component';
 import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 import { TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ScoreGameRowComponent } from "../components/score-game-row.component";
 
 @Component({
   selector: 'ws-active-game',
@@ -27,6 +28,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
     NgForOf,
     TuiChip,
     NgIf,
+    KeyValuePipe,
     TuiButton,
     TuiLoader,
     NgStyle,
@@ -39,6 +41,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
     TuiDataList,
     TuiDialog,
     NgClass,
+    ScoreGameRowComponent,
   ],
   templateUrl: 'active-game.component.html',
   styleUrl: 'active-game.component.scss'
@@ -54,7 +57,7 @@ export class ActiveGameComponent implements OnInit {
 
   @ViewChild('chooseCharacter') chooseCharacterTemplate: PolymorpheusContent<TuiDialogContext> | null = null;
 
-  avatarColors = [ '#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99' ];
+  avatarColors = ['#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99'];
   gameCode: string = '';
   joinGameUrl: string = '';
   game = signal({} as any);
@@ -62,7 +65,7 @@ export class ActiveGameComponent implements OnInit {
   currentUserName = signal('');
   isGameActive = computed(() => this.game().status === this.GAME_ACTIVE);
   isGameAdmin = computed(() => this.game().initiatedBy === this.currentUserName());
-  isRoundComptroller = computed(() => this.currentUserName() === this.gameState.currentPLayer);
+  isRoundComptroller = computed(() => this.currentUserName() === this.gameState.currentPlayer);
   gameState: any = {};
   isLoading = false;
 
@@ -110,7 +113,7 @@ export class ActiveGameComponent implements OnInit {
       this.addRtListeners(gameRtService);
     } catch (e) {
       this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
-      await this.router.navigate([ '/' ]);
+      await this.router.navigate(['/']);
     }
   }
 
@@ -148,7 +151,16 @@ export class ActiveGameComponent implements OnInit {
   }
 
   async submitRound() {
+    this.isLoading = true;
 
+    try {
+      const res = await this.gameService.submitRound(this.gameCode, this.currentUserName(), this.roundEntry.character, this.roundEntry.entries);
+      // TODO: display the submitted play
+    } catch (e) {
+      this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   avatarColour(index: number): string {
@@ -170,6 +182,11 @@ export class ActiveGameComponent implements OnInit {
 
   dismissRoundConfirmationModal() {
     this.isRoundSubmissionModalVisible = false;
+  }
+
+  rowDataChanged(event: any) {
+    console.log(event);
+    this.roundEntry = event;
   }
 
   private parseGameCode(): string {
@@ -240,10 +257,9 @@ export class ActiveGameComponent implements OnInit {
         this.currentIntervalCountdown -= 1;
         if (this.currentIntervalCountdown === 0) {
           this.characterControl.setValue(this.getRandomElement(this.availableCharacters));
-          this.startRound()
-            .then(() => {
-              console.log('Round started after timeout');
-            });
+          this.startRound().then(() => {
+            console.log('Round started after timeout');
+          });
         }
       }, 1000);
     });
@@ -257,6 +273,9 @@ export class ActiveGameComponent implements OnInit {
         this.currentRoundCountdown -= 1;
         if (this.currentRoundCountdown === 0) {
           clearInterval(currentRoundCountdownIntervalId);
+          this.submitRound().then(() => {
+            console.log('Round submitted after timeout');
+          });
         }
       }, 1000);
     });
@@ -269,6 +288,8 @@ export class ActiveGameComponent implements OnInit {
 
     // show the winner details and score breakdown
     rtService.gameOver().subscribe(({ winningPlayers, playerScores }) => {
+      // TODO: display winners and prompt to play again
+      this.toasts.showSuccess('Game over. Thanks for playing!');
     });
   }
 

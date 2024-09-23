@@ -1,4 +1,4 @@
-<ng-container *ngIf="!isGameActive">
+<ng-container *ngIf="!isGameActive()">
   <div class="active-game-awaiting">
     <div class="header">
       Game On: Awaiting Players
@@ -54,7 +54,7 @@
     <div class="ws-divider"></div>
 
     <div class="action">
-      <ng-container *ngIf="isGameAdmin">
+      <ng-container *ngIf="isGameAdmin()">
         <button class="ws-button"
                 [disabled]="game().players?.length < 2"
                 (click)="startGame()">
@@ -63,14 +63,14 @@
           </tui-loader>
         </button>
       </ng-container>
-      <ng-container *ngIf="!isGameAdmin">
+      <ng-container *ngIf="!isGameAdmin()">
         <div>Ask the game admin to start the game</div>
       </ng-container>
     </div>
   </div>
 </ng-container>
 
-<ng-container *ngIf="isGameActive">
+<ng-container *ngIf="isGameActive()">
   <div class="active-game-active">
     <div class="header">
       Game On: <i>{{ currentUserName() }}</i>!!
@@ -108,7 +108,7 @@
             [character]="char"
             [columns]="game().columns"
             [enabled]="isRowPlayable(char)"
-            [(data)]="roundEntry">
+            (dataChange)="rowDataChanged($event)">
           <td>
             <ng-container *ngIf="isRowPlayable(char)">
               <button
@@ -175,7 +175,8 @@
     <div class="actions">
       <button
         type="button"
-        class="ws-button">
+        class="ws-button"
+        (click)="submitRound()">
         Yes, Submit
       </button>
       <button
@@ -198,10 +199,12 @@
         View Round Submissions
       </ng-container>
     </div>
-    <div class="preamble">
-      You still have <span>{{ currentRoundCountdown }}</span>
-      seconds left in this round. Are you sure you want to submit your results now? If you proceed, you will no longer
-      be able to modify them.
+    <div>
+      <ng-container *ngFor="let item of roundPlays | keyvalue">
+        <ws-score-game-round-row
+          [userName]="item.key!"
+          [columnEntries]="item.value.columnValues"/>
+      </ng-container>
     </div>
 
     <div class="actions">
@@ -209,12 +212,6 @@
         type="button"
         class="ws-button">
         Yes, Submit
-      </button>
-      <button
-        type="button"
-        class="ws-button outline"
-        (click)="dismissRoundConfirmationModal()">
-        No, Cancel
       </button>
     </div>
   </div>
