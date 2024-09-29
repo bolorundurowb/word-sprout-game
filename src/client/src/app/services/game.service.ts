@@ -43,9 +43,13 @@ export class GameService {
     }));
   }
 
-  submitRound(gameCode: string, userName: string, character: string, entries: any) {
+  getPlays(gameCode: string, userName: string) {
+    return firstValueFrom(this.http.get(`${this.BASE_API}/${gameCode}/players/${userName}/plays`));
+  }
+
+  submitPlay(gameCode: string, userName: string, character: string, entries: any) {
     return firstValueFrom(
-      this.http.post(`${this.BASE_API}/${gameCode}/players/${userName}/play`, {
+      this.http.post(`${this.BASE_API}/${gameCode}/players/${userName}/plays`, {
         character,
         columnValues: entries
       })
