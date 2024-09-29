@@ -18,8 +18,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
     [ProducesResponseType(typeof(GenericRes), 404)]
     public async Task<IActionResult> GetByCode(string gameCode)
     {
-        var game = await Meerkat.FindOneAsync<Game>(x =>
-            x.Code == gameCode && x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active);
+        var game = await GetActiveOrAwaiting(gameCode);
 
         if (game == null)
             return NotFound("Game does not exist");
@@ -44,8 +43,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
     [ProducesResponseType(typeof(GenericRes), 404)]
     public async Task<IActionResult> JoinGame(string gameCode, [FromBody] JoinGameReq req)
     {
-        var game = await Meerkat.FindOneAsync<Game>(x =>
-            x.Code == gameCode && x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active);
+        var game = await GetActiveOrAwaiting(gameCode);
 
         if (game == null)
             return NotFound("Game does not exist");
@@ -84,7 +82,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         // notify the other users that the game is started and the countdown should start
         await gameHub.Clients.All.GameStarted(gameCode);
-        await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State.CurrentPlayer);
+        await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State.CurrentPlayer!);
 
         return Ok(mapper.Map<GameRes>(game));
     }
@@ -127,6 +125,29 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
             return BadRequest("Only active games can provide state");
 
         return Ok(game.State);
+    }
+
+    [HttpGet("{gameCode}/players/{userName}/plays")]
+    [ProducesResponseType(typeof(List<Play>), 200)]
+    [ProducesResponseType(typeof(GenericRes), 400)]
+    [ProducesResponseType(typeof(GenericRes), 403)]
+    [ProducesResponseType(typeof(GenericRes), 404)]
+    public async Task<IActionResult> GetPlays(string gameCode, string userName)
+    {
+        var game = await Meerkat.FindOneAsync<Game>(x => x.Code == gameCode);
+
+        if (game == null)
+            return NotFound("Game with that code does not exist");
+
+        if (game.Status is GameStatus.AwaitingPlayers)
+            return BadRequest("There are no plays for this game");
+
+        var player = game.Players.FirstOrDefault(x => x.UserName == userName);
+
+        if (player == null)
+            return Forbidden();
+        
+        return Ok(player.Plays);
     }
 
     [HttpPost("{gameCode}/players/{userName}/plays")]
@@ -226,4 +247,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         return Ok();
     }
+
+    private Task<Game?> GetActiveOrAwaiting(string gameCode) => Meerkat.FindOneAsync<Game>(x =>
+        x.Code == gameCode && (x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active));
 }
