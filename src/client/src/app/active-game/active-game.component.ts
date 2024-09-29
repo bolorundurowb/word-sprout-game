@@ -68,6 +68,7 @@ export class ActiveGameComponent implements OnInit {
   isRoundComptroller = computed(() => this.currentUserName() === this.gameState.currentPlayer);
   gameState: any = {};
   isLoading = false;
+  plays: Record<string, any> = {};
 
   // interval state details
   currentIntervalCountdown = 0;
@@ -82,6 +83,7 @@ export class ActiveGameComponent implements OnInit {
 
   // round state details
   isRoundSubmissionModalVisible = false;
+  currentRoundCountdownIntervalId?: any;
   currentRoundCountdown = 0;
   roundEntry: any;
 
@@ -101,10 +103,10 @@ export class ActiveGameComponent implements OnInit {
       this.joinGameUrl = this.composeJoinUrl();
       this.game.set(await this.getAndValidateGame());
 
-      // if game status is active get the current state
+      // if game status is active get the current state and user plays
       if (this.isGameActive()) {
-        const gameState = await this.gameService.getState(this.gameCode);
-        this.setGameState(gameState);
+        this.setGameState(await this.gameService.getState(this.gameCode));
+        this.plays = await this.gameService.getPlays(this.gameCode, this.currentUserName());
       }
 
       // set up the real time service
@@ -154,8 +156,18 @@ export class ActiveGameComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      const res = await this.gameService.submitRound(this.gameCode, this.currentUserName(), this.roundEntry.character, this.roundEntry.entries);
+      console.log('Hello');
+      // stop the countdown
+      if (this.currentIntervalCountdownIntervalId) {
+        clearInterval(this.currentIntervalCountdownIntervalId);
+        console.log('Cleared interval');
+      }
+
+      console.log('About to submit round');
+      const res = await this.gameService.submitPlay(this.gameCode, this.currentUserName(), this.roundEntry.character, this.roundEntry.entries);
       // TODO: display the submitted play
+      console.log('------------->', res, '<----------->')
+      console.log('Round submitted');
     } catch (e) {
       this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
     } finally {
@@ -268,11 +280,18 @@ export class ActiveGameComponent implements OnInit {
     rtService.roundStarted().subscribe(({ playerUserName, character }) => {
       this.setGameState({ ...this.gameState, currentPlayer: playerUserName, currentCharacter: character });
 
+      // cancel the interval countdown
+      this.currentIntervalCountdown = 0;
+      if (this.currentIntervalCountdownIntervalId) {
+        clearInterval(this.currentIntervalCountdownIntervalId)
+      }
+
+      // start the round countdown
       this.currentRoundCountdown = this.game().maxRoundDurationInSecs;
-      const currentRoundCountdownIntervalId = setInterval(() => {
+      this.currentRoundCountdownIntervalId = setInterval(() => {
         this.currentRoundCountdown -= 1;
         if (this.currentRoundCountdown === 0) {
-          clearInterval(currentRoundCountdownIntervalId);
+          clearInterval(this.currentRoundCountdownIntervalId);
           this.submitRound().then(() => {
             console.log('Round submitted after timeout');
           });
