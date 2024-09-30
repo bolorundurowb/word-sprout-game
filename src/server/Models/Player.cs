@@ -12,7 +12,7 @@ public class Player
 
     public Player(string userName)
     {
-        Plays = new List<Play>();
+        Plays = [];
         JoinedAt = DateTimeOffset.UtcNow;
 
         UserName = userName.ToLowerInvariant();
@@ -20,7 +20,7 @@ public class Player
 
     public Play AddPlay(char character, Dictionary<string, string> columnValues)
     {
-        Plays ??= new List<Play>();
+        Plays ??= [];
 
         if (Plays.Any(x => x.Character == character))
             throw new InvalidOperationException("Character already played");

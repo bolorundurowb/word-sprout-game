@@ -28,7 +28,11 @@ public class Game : Schema
 
     public GameState State { get; set; }
 
-    private Game() { }
+#pragma warning disable CS8618
+    private Game()
+    {
+    }
+#pragma warning restore CS8618
 
     public Game(string userName, int maxIntervalBetweenRoundsInSecs, int maxRoundDurationInSecs, List<string> columns,
         List<char> characterSet) : base()
@@ -43,7 +47,7 @@ public class Game : Schema
         Columns = columns;
         CharacterSet = characterSet;
 
-        Players = new List<Player> { new(userName) };
+        Players = [new(userName)];
     }
 
     public void AddPlayer(string userName)

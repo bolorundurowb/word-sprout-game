@@ -128,7 +128,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
     }
 
     [HttpGet("{gameCode}/players/{userName}/plays")]
-    [ProducesResponseType(typeof(List<Play>), 200)]
+    [ProducesResponseType(typeof(Dictionary<char, Dictionary<string, string?>>), 200)]
     [ProducesResponseType(typeof(GenericRes), 400)]
     [ProducesResponseType(typeof(GenericRes), 403)]
     [ProducesResponseType(typeof(GenericRes), 404)]
@@ -146,8 +146,9 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         if (player == null)
             return Forbidden();
-        
-        return Ok(player.Plays);
+
+        var response = player.Plays.ToDictionary(x => x.Character, y => y.ColumnValues);
+        return Ok(response);
     }
 
     [HttpPost("{gameCode}/players/{userName}/plays")]
