@@ -3,6 +3,7 @@ import { NgForOf } from '@angular/common';
 import { TuiInputModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { TuiTextfieldOptionsDirective } from '@taiga-ui/core';
 import { FormsModule } from '@angular/forms';
+import { RowData } from "../app.types";
 
 export interface GameRoundData {
   character: string;
@@ -26,7 +27,7 @@ export interface GameRoundData {
       <td>
         <tui-input
           tuiTextfieldSize="m"
-          [(ngModel)]="data.entries[column]"
+          [(ngModel)]="data[column]"
           [tuiTextfieldLabelOutside]="true">
           <input
             name="ws-gr-{{column}}"
@@ -56,15 +57,11 @@ export class GameRoundRowComponent {
   @Input() enabled = true;
 
   // @ts-ignore
-  @Input() data: GameRoundData;
-  @Output() dataChange = new EventEmitter<GameRoundData>();
+  @Input() data: RowData;
+  @Output() dataChange = new EventEmitter<RowData>();
 
   constructor() {
-    this.data = {
-      character: this.character,
-      score: this.score,
-      entries: {}
-    };
+    this.data = {};
   }
 
   disableEvent(event: any) {

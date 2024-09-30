@@ -1,4 +1,5 @@
 import { Component, Input } from "@angular/core";
+import { RowData } from "../app.types";
 
 @Component({
   selector: 'ws-score-game-round-row',
@@ -15,5 +16,5 @@ import { Component, Input } from "@angular/core";
 })
 export class ScoreGameRowComponent {
   @Input() userName: string = '';
-  @Input() columnEntries: Array<string> = [];
+  @Input() columnEntries: RowData = {};
 }

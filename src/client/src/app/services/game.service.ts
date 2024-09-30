@@ -5,6 +5,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { Play } from "../app.types";
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -28,26 +29,26 @@ export class GameService {
       .toPromise();
   }
 
-  start(gameCode: string) {
+  start(gameCode: string): Promise<any> {
     return firstValueFrom(this.http.post(`${this.BASE_API}/${gameCode}/start`, {}));
   }
 
-  getState(gameCode: string) {
+  getState(gameCode: string): Promise<any> {
     return firstValueFrom(this.http.get(`${this.BASE_API}/${gameCode}/state`));
   }
 
-  startRound(gameCode: string, character: string, userName: string) {
+  startRound(gameCode: string, character: string, userName: string): Promise<any> {
     return firstValueFrom(this.http.post(`${this.BASE_API}/${gameCode}/start-round`, {
       character,
       playerUserName: userName
     }));
   }
 
-  getPlays(gameCode: string, userName: string) {
+  getPlays(gameCode: string, userName: string): Promise<any> {
     return firstValueFrom(this.http.get(`${this.BASE_API}/${gameCode}/players/${userName}/plays`));
   }
 
-  submitPlay(gameCode: string, userName: string, character: string, entries: any) {
+  submitPlay(gameCode: string, userName: string, character: string, entries: any): Promise<any> {
     return firstValueFrom(
       this.http.post(`${this.BASE_API}/${gameCode}/players/${userName}/plays`, {
         character,

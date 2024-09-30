@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
 import {
   TuiButton, TuiDataList, TuiDialog,
   TuiDialogContext,
@@ -18,6 +18,7 @@ import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 import { TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ScoreGameRowComponent } from "../components/score-game-row.component";
+import { Game, GameState, RowData } from "../app.types";
 
 @Component({
   selector: 'ws-active-game',
@@ -60,15 +61,15 @@ export class ActiveGameComponent implements OnInit {
   avatarColors = ['#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99'];
   gameCode: string = '';
   joinGameUrl: string = '';
-  game = signal({} as any);
+  game: WritableSignal<Game> = signal({} as Game);
 
   currentUserName = signal('');
   isGameActive = computed(() => this.game().status === this.GAME_ACTIVE);
   isGameAdmin = computed(() => this.game().initiatedBy === this.currentUserName());
   isRoundComptroller = computed(() => this.currentUserName() === this.gameState.currentPlayer);
-  gameState: any = {};
+  gameState: GameState = { playedCharacters: [] };
   isLoading = false;
-  plays: Record<string, any> = {};
+  currentUserPlays: Record<string, RowData> = {};
 
   // interval state details
   currentIntervalCountdown = 0;
@@ -89,7 +90,7 @@ export class ActiveGameComponent implements OnInit {
 
   // round over state details
   isRoundEndedModalVisible = false;
-  roundPlays: Record<string, any> = {};
+  endedRoundUserPlays: Record<string, RowData> = {};
 
 
   constructor(title: Title) {
@@ -106,8 +107,11 @@ export class ActiveGameComponent implements OnInit {
       // if game status is active get the current state and user plays
       if (this.isGameActive()) {
         this.setGameState(await this.gameService.getState(this.gameCode));
-        this.plays = await this.gameService.getPlays(this.gameCode, this.currentUserName());
+        this.currentUserPlays = await this.gameService.getPlays(this.gameCode, this.currentUserName());
       }
+
+      // initialize the play row data
+      this.initializeRowData();
 
       // set up the real time service
       const gameRtService = new GameRealTimeService(this.gameCode);
@@ -156,18 +160,18 @@ export class ActiveGameComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      console.log('Hello');
       // stop the countdown
       if (this.currentIntervalCountdownIntervalId) {
         clearInterval(this.currentIntervalCountdownIntervalId);
         console.log('Cleared interval');
       }
 
-      console.log('About to submit round');
+      console.log('About to submit round', this.roundEntry);
       const res = await this.gameService.submitPlay(this.gameCode, this.currentUserName(), this.roundEntry.character, this.roundEntry.entries);
       // TODO: display the submitted play
       console.log('------------->', res, '<----------->')
       console.log('Round submitted');
+      this.currentUserPlays[res.character] = res.columnValues;
     } catch (e) {
       this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
     } finally {
@@ -199,6 +203,14 @@ export class ActiveGameComponent implements OnInit {
   rowDataChanged(event: any) {
     console.log(event);
     this.roundEntry = event;
+  }
+
+  protected isRowPlayed(character: string): boolean {
+    return this.gameState.playedCharacters?.includes(character) ?? false;
+  }
+
+  protected isRowPlayable(character: string): boolean {
+    return this.currentRoundCountdown > 0 && character === this.gameState.currentCharacter;
   }
 
   private parseGameCode(): string {
@@ -301,7 +313,7 @@ export class ActiveGameComponent implements OnInit {
 
     // trigger the scoring flow
     rtService.roundEnded().subscribe((plays) => {
-      this.roundPlays = plays;
+      this.endedRoundUserPlays = plays;
       this.isRoundEndedModalVisible = true;
     });
 
@@ -312,14 +324,6 @@ export class ActiveGameComponent implements OnInit {
     });
   }
 
-  protected isRowPlayed(character: string): boolean {
-    return this.gameState.playedCharacters?.includes(character) ?? false;
-  }
-
-  protected isRowPlayable(character: string): boolean {
-    return this.currentRoundCountdown > 0 && character === this.gameState.currentCharacter;
-  }
-
   private getRandomElement<T>(array: T[]): T {
     if (array.length === 0) {
       throw new Error('Array is empty.');
@@ -327,5 +331,13 @@ export class ActiveGameComponent implements OnInit {
 
     const randomIndex = Math.floor(Math.random() * array.length);
     return array[randomIndex];
+  }
+
+  private initializeRowData() {
+    for (const character of this.game().characterSet) {
+      if (!this.currentUserPlays[character]) {
+        this.currentUserPlays[character] = {};
+      }
+    }
   }
 }
