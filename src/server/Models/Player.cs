@@ -14,11 +14,10 @@ public class Player
     {
         Plays = [];
         JoinedAt = DateTimeOffset.UtcNow;
-
-        UserName = userName.ToLowerInvariant();
+        UserName = userName.Trim();
     }
 
-    public Play AddPlay(char character, Dictionary<string, string> columnValues)
+    public Play AddPlay(char character, Dictionary<string, string?> columnValues)
     {
         Plays ??= [];
 

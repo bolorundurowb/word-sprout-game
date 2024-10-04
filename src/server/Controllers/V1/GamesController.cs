@@ -174,19 +174,11 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         var play = player.AddPlay(req.Character, req.ColumnValues);
         await game.SaveAsync();
 
+        await gameHub.Clients.All.RoundPlaySubmitted(gameCode, userName, req.Character, req.ColumnValues);
+
         // if the play is submitted by the current player, then the round is over
         if (game.State.CurrentPlayer == userName)
-        {
-            var playMap = new Dictionary<string, Play>();
-
-            foreach (var gamePlayer in game.Players)
-            {
-                var playerPlay = gamePlayer.Plays.First(x => x.Character == req.Character);
-                playMap.Add(gamePlayer.UserName, playerPlay);
-            }
-
-            await gameHub.Clients.All.RoundEnded(gameCode, playMap);
-        }
+            await gameHub.Clients.All.RoundEnded(gameCode, req.Character);
 
         return Ok(play);
     }
@@ -249,6 +241,6 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         return Ok();
     }
 
-    private Task<Game?> GetActiveOrAwaiting(string gameCode) => Meerkat.FindOneAsync<Game>(x =>
+    private static Task<Game?> GetActiveOrAwaiting(string gameCode) => Meerkat.FindOneAsync<Game>(x =>
         x.Code == gameCode && (x.Status == GameStatus.AwaitingPlayers || x.Status == GameStatus.Active));
 }
