@@ -171,7 +171,12 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         if (player == null)
             return Forbidden();
 
+        var isRoundComptroller = game.State.CurrentPlayer == userName;
         var play = player.AddPlay(req.Character, req.ColumnValues);
+
+        if (isRoundComptroller)
+            game.State.MarkAsAwaitingScoring();
+
         await game.SaveAsync();
 
         await gameHub.Clients.All.RoundPlaySubmitted(gameCode, userName, req.Character, req.ColumnValues);
@@ -216,6 +221,10 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         if (game.IsGameOver())
         {
+            // clear the round status
+            game.State.ClearStatus();
+            await game.SaveAsync();
+
             // compute all player scores
             var playerScores = game.Players
                 .Select(x => new { x.UserName, GameScore = x.Plays.Sum(y => y.Score) })

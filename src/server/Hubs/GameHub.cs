@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using WordSproutApi.Models;
 
 namespace WordSproutApi.Hubs;
 
