@@ -27,3 +27,13 @@ export interface Game {
   maxIntervalBetweenRoundsInSecs: number,
   maxRoundDurationInSecs: number
 }
+
+export interface RoundPlaySubmittedEvent {
+  userName: string;
+  character: string;
+  columnValues: RowData;
+}
+
+export interface RoundEndedEvent {
+  character: string;
+}

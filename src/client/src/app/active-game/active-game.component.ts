@@ -19,6 +19,7 @@ import { TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy'
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ScoreGameRowComponent } from "../components/score-game-row.component";
 import { Game, GameState, RowData } from "../app.types";
+import { parseErrorMessage } from "../app.utils";
 
 @Component({
   selector: 'ws-active-game',
@@ -87,6 +88,7 @@ export class ActiveGameComponent implements OnInit {
   currentRoundCountdownIntervalId?: any;
   currentRoundCountdown = 0;
   roundEntry: any;
+  currentRoundPlays: Record<string, RowData> = {};
 
   // round over state details
   isRoundEndedModalVisible = false;
@@ -118,7 +120,8 @@ export class ActiveGameComponent implements OnInit {
       await gameRtService.init();
       this.addRtListeners(gameRtService);
     } catch (e) {
-      this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
+      console.error(e);
+      this.toasts.showError(parseErrorMessage(e));
       await this.router.navigate(['/']);
     }
   }
@@ -148,7 +151,7 @@ export class ActiveGameComponent implements OnInit {
       clearInterval(this.currentIntervalCountdownIntervalId);
       this.isCharacterSelectionModalVisible = false;
     } catch (e) {
-      this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
+      this.toasts.showError(parseErrorMessage(e));
     } finally {
       this.isLoading = false;
     }
@@ -160,20 +163,22 @@ export class ActiveGameComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      // stop the countdown
-      if (this.currentIntervalCountdownIntervalId) {
-        clearInterval(this.currentIntervalCountdownIntervalId);
-        console.log('Cleared interval');
+      // stop the round countdown
+      if (this.currentRoundCountdownIntervalId) {
+        clearInterval(this.currentRoundCountdownIntervalId);
       }
 
-      console.log('About to submit round', this.roundEntry);
-      const res = await this.gameService.submitPlay(this.gameCode, this.currentUserName(), this.roundEntry.character, this.roundEntry.entries);
+      const character = this.gameState.currentCharacter!;
+      console.log('About to submit round', this.currentUserPlays, character);
+      const res = await this.gameService.submitPlay(this.gameCode, this.currentUserName(), character, this.currentUserPlays[character]);
       // TODO: display the submitted play
       console.log('------------->', res, '<----------->')
       console.log('Round submitted');
       this.currentUserPlays[res.character] = res.columnValues;
+
+      this.dismissRoundConfirmationModal();
     } catch (e) {
-      this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
+      this.toasts.showError(parseErrorMessage(e));
     } finally {
       this.isLoading = false;
     }
@@ -198,6 +203,14 @@ export class ActiveGameComponent implements OnInit {
 
   dismissRoundConfirmationModal() {
     this.isRoundSubmissionModalVisible = false;
+  }
+
+  showRoundEndedModal() {
+    this.isRoundEndedModalVisible = true;
+  }
+
+  dismissRoundEndedModal() {
+    this.isRoundEndedModalVisible = false;
   }
 
   rowDataChanged(event: any) {
@@ -311,10 +324,23 @@ export class ActiveGameComponent implements OnInit {
       }, 1000);
     });
 
-    // trigger the scoring flow
-    rtService.roundEnded().subscribe((plays) => {
-      this.endedRoundUserPlays = plays;
-      this.isRoundEndedModalVisible = true;
+    // record round user plays
+    rtService.roundPlaySubmitted().subscribe(({character, userName, columnValues}) => {
+      if (this.gameState.currentCharacter !== character) {
+        console.error('For some reason we received a play for the wrong character', {userName, character, columnValues});
+      } else {
+        this.currentRoundPlays[userName] = columnValues;
+      }
+    });
+
+    // force submission and display round plays
+    rtService.roundEnded().subscribe(async ({character}) => {
+      if (this.gameState.currentCharacter !== character) {
+        console.error('For some reason we received an end for the wrong character', {character});
+      }
+
+      await this.submitRound()
+      this.showRoundEndedModal();
     });
 
     // show the winner details and score breakdown

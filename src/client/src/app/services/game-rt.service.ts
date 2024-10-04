@@ -1,5 +1,6 @@
 import * as signalr from '@microsoft/signalr';
 import { Observable } from 'rxjs';
+import { RoundEndedEvent, RoundPlaySubmittedEvent } from "../app.types";
 
 export class GameRealTimeService {
   private hubConnection: signalr.HubConnection;
@@ -57,11 +58,21 @@ export class GameRealTimeService {
     });
   }
 
-  roundEnded(): Observable<any> {
+  roundPlaySubmitted(): Observable<RoundPlaySubmittedEvent> {
     return new Observable(observer => {
-      this.hubConnection.on('RoundEnded', (gameCode: string, plays: Record<string, any>) => {
+      this.hubConnection.on('RoundPlaySubmitted', (gameCode: string, userName: string, character: string, columnValues: Record<string, string>) => {
         if (gameCode === this.gameCode) {
-          observer.next(plays);
+          observer.next({ userName, character, columnValues });
+        }
+      });
+    });
+  }
+
+  roundEnded(): Observable<RoundEndedEvent> {
+    return new Observable(observer => {
+      this.hubConnection.on('RoundEnded', (gameCode: string, character: string) => {
+        if (gameCode === this.gameCode) {
+          observer.next({ character });
         }
       });
     });
@@ -71,7 +82,7 @@ export class GameRealTimeService {
     return new Observable(observer => {
       this.hubConnection.on('GameOver', (gameCode: string, winningPlayers: Array<string>, playerScores: Record<string, number>) => {
         if (gameCode === this.gameCode) {
-          observer.next({winningPlayers, playerScores});
+          observer.next({ winningPlayers, playerScores });
         }
       });
     });
