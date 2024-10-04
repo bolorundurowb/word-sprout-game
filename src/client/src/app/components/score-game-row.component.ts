@@ -18,3 +18,15 @@ export class ScoreGameRowComponent {
   @Input() userName: string = '';
   @Input() columnEntries: RowData = {};
 }
+
+@Component({
+  selector: 'ws-score-game-round-cell',
+  standalone: true,
+  template: `
+  <div>Hello</div>
+  `,
+  styles: ``
+})
+export class ScoreGameRoundCellComponent {
+
+}

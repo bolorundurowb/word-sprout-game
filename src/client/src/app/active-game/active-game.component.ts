@@ -1,10 +1,5 @@
 import { Component, computed, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
-import {
-  TuiButton, TuiDataList, TuiDialog,
-  TuiDialogContext,
-  TuiLoader,
-  TuiTitle
-} from '@taiga-ui/core';
+import { TuiButton, TuiDataList, TuiDialog, TuiDialogContext, TuiLoader, TuiTitle } from '@taiga-ui/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JsonPipe, KeyValuePipe, NgClass, NgForOf, NgIf, NgOptimizedImage, NgStyle } from '@angular/common';
@@ -18,7 +13,7 @@ import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 import { TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ScoreGameRowComponent } from "../components/score-game-row.component";
-import { Game, GameState, RowData } from "../app.types";
+import { Game, GameRoundStatus, GameState, RowData } from "../app.types";
 import { parseErrorMessage } from "../app.utils";
 
 @Component({
@@ -69,6 +64,7 @@ export class ActiveGameComponent implements OnInit {
   isGameAdmin = computed(() => this.game().initiatedBy === this.currentUserName());
   isRoundComptroller = computed(() => this.currentUserName() === this.gameState.currentPlayer);
   gameState: GameState = { playedCharacters: [] };
+  roundStatus?: GameRoundStatus;
   isLoading = false;
   currentUserPlays: Record<string, RowData> = {};
 
@@ -176,6 +172,7 @@ export class ActiveGameComponent implements OnInit {
       console.log('Round submitted');
       this.currentUserPlays[res.character] = res.columnValues;
 
+      this.roundStatus = GameRoundStatus.SCORING;
       this.dismissRoundConfirmationModal();
     } catch (e) {
       this.toasts.showError(parseErrorMessage(e));
@@ -223,7 +220,13 @@ export class ActiveGameComponent implements OnInit {
   }
 
   protected isRowPlayable(character: string): boolean {
-    return this.currentRoundCountdown > 0 && character === this.gameState.currentCharacter;
+    return this.roundStatus === GameRoundStatus.PLAYING
+      && !this.hasPlayerSubmittedRow(character)
+      && character === this.gameState.currentCharacter;
+  }
+
+  private hasPlayerSubmittedRow(character: string): boolean {
+    return this.currentUserPlays[character] !== undefined;
   }
 
   private parseGameCode(): string {
@@ -265,8 +268,12 @@ export class ActiveGameComponent implements OnInit {
     const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName();
     const roundInProgress = this.gameState.currentCharacter && !this.gameState.playedCharacters.includes(this.gameState.currentCharacter);
 
-    if (isCurrentPlayer && !roundInProgress) {
-      this.showChooseCharacterModal();
+    if (roundInProgress) {
+      this.roundStatus = GameRoundStatus.PLAYING;
+    } else {
+      if (isCurrentPlayer) {
+        this.showChooseCharacterModal();
+      }
     }
   }
 
@@ -289,6 +296,7 @@ export class ActiveGameComponent implements OnInit {
     rtService.roundCountdownInitiated().subscribe(currentPlayer => {
       this.setGameState({ ...this.gameState, currentPlayer });
 
+      this.roundStatus = GameRoundStatus.INTERVAL;
       this.currentIntervalCountdown = this.game().maxIntervalBetweenRoundsInSecs;
       this.currentIntervalCountdownIntervalId = setInterval(() => {
         this.currentIntervalCountdown -= 1;
@@ -310,6 +318,9 @@ export class ActiveGameComponent implements OnInit {
       if (this.currentIntervalCountdownIntervalId) {
         clearInterval(this.currentIntervalCountdownIntervalId)
       }
+
+      // set the game round status
+      this.roundStatus = GameRoundStatus.PLAYING;
 
       // start the round countdown
       this.currentRoundCountdown = this.game().maxRoundDurationInSecs;
@@ -366,4 +377,6 @@ export class ActiveGameComponent implements OnInit {
       }
     }
   }
+
+  protected readonly GameRoundStatus = GameRoundStatus;
 }

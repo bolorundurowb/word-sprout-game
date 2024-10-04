@@ -78,8 +78,8 @@
 
     <div>
       This round is led by <i>{{ gameState.currentPlayer }}</i>.
-      <span *ngIf="currentIntervalCountdown > 0">They have <b>{{ currentIntervalCountdown }}</b> seconds to choose the character to be played</span>
-      <span *ngIf="currentRoundCountdown > 0">The character to play is <b>{{ gameState.currentCharacter }}</b> and you have <b>{{ currentRoundCountdown }}</b> seconds to fill in the entries.</span>
+      <span *ngIf="roundStatus === GameRoundStatus.INTERVAL">They have <b>{{ currentIntervalCountdown }}</b> seconds to choose the character to be played</span>
+      <span *ngIf="roundStatus === GameRoundStatus.PLAYING">The character to play is <b>{{ gameState.currentCharacter }}</b> and you have <b>{{ currentRoundCountdown }}</b> seconds to fill in the entries.</span>
     </div>
 
     <div class="ws-divider"></div>

@@ -37,3 +37,9 @@ export interface RoundPlaySubmittedEvent {
 export interface RoundEndedEvent {
   character: string;
 }
+
+export enum GameRoundStatus {
+  INTERVAL,
+  PLAYING,
+  SCORING
+}
