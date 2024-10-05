@@ -9,6 +9,8 @@ export interface GameState {
   currentCharacter?: string;
   playedCharacters: string[];
   currentPlayer?: string;
+  roundStatus?: GameRoundStatus;
+  secsSinceStatusChange: number;
 }
 
 export interface Player {
@@ -39,7 +41,7 @@ export interface RoundEndedEvent {
 }
 
 export enum GameRoundStatus {
-  INTERVAL,
-  PLAYING,
-  SCORING
+  INTERVAL = 'AwaitingCharacterSelection',
+  PLAYING = 'InProgress',
+  SCORING = 'AwaitingScoring'
 }

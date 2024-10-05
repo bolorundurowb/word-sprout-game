@@ -1,6 +1,6 @@
 import * as signalr from '@microsoft/signalr';
 import { Observable } from 'rxjs';
-import { RoundEndedEvent, RoundPlaySubmittedEvent } from "../app.types";
+import { GameState, RoundEndedEvent, RoundPlaySubmittedEvent } from "../app.types";
 
 export class GameRealTimeService {
   private hubConnection: signalr.HubConnection;
@@ -38,21 +38,21 @@ export class GameRealTimeService {
     });
   }
 
-  roundCountdownInitiated(): Observable<string> {
+  roundCountdownInitiated(): Observable<GameState> {
     return new Observable(observer => {
-      this.hubConnection.on('RoundCountdownInitiated', (gameCode: string, currentPlayerUserName: string) => {
+      this.hubConnection.on('RoundCountdownInitiated', (gameCode: string, gameState: GameState) => {
         if (gameCode === this.gameCode) {
-          observer.next(currentPlayerUserName);
+          observer.next(gameState);
         }
       });
     });
   }
 
-  roundStarted(): Observable<any> {
+  roundStarted(): Observable<GameState> {
     return new Observable(observer => {
-      this.hubConnection.on('RoundStarted', (gameCode: string, playerUserName: string, character: string) => {
+      this.hubConnection.on('RoundStarted', (gameCode: string, gameState: GameState) => {
         if (gameCode === this.gameCode) {
-          observer.next({ playerUserName, character });
+          observer.next(gameState);
         }
       });
     });
@@ -68,11 +68,11 @@ export class GameRealTimeService {
     });
   }
 
-  roundEnded(): Observable<RoundEndedEvent> {
+  roundEnded(): Observable<GameState> {
     return new Observable(observer => {
-      this.hubConnection.on('RoundEnded', (gameCode: string, character: string) => {
+      this.hubConnection.on('RoundEnded', (gameCode: string, gameState: GameState) => {
         if (gameCode === this.gameCode) {
-          observer.next({ character });
+          observer.next(gameState);
         }
       });
     });

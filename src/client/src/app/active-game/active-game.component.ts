@@ -63,8 +63,7 @@ export class ActiveGameComponent implements OnInit {
   isGameActive = computed(() => this.game().status === this.GAME_ACTIVE);
   isGameAdmin = computed(() => this.game().initiatedBy === this.currentUserName());
   isRoundComptroller = computed(() => this.currentUserName() === this.gameState.currentPlayer);
-  gameState: GameState = { playedCharacters: [] };
-  roundStatus?: GameRoundStatus;
+  gameState: GameState = { playedCharacters: [], secsSinceStatusChange: 0 };
   isLoading = false;
   currentUserPlays: Record<string, RowData> = {};
 
@@ -172,7 +171,6 @@ export class ActiveGameComponent implements OnInit {
       console.log('Round submitted');
       this.currentUserPlays[res.character] = res.columnValues;
 
-      this.roundStatus = GameRoundStatus.SCORING;
       this.dismissRoundConfirmationModal();
     } catch (e) {
       this.toasts.showError(parseErrorMessage(e));
@@ -220,8 +218,7 @@ export class ActiveGameComponent implements OnInit {
   }
 
   protected isRowPlayable(character: string): boolean {
-    return this.roundStatus === GameRoundStatus.PLAYING
-      && !this.hasPlayerSubmittedRow(character)
+    return this.gameState.roundStatus === GameRoundStatus.PLAYING
       && character === this.gameState.currentCharacter;
   }
 
@@ -263,13 +260,13 @@ export class ActiveGameComponent implements OnInit {
     return game;
   }
 
-  private setGameState(gameState: any) {
-    this.gameState = gameState;
+  private setGameState(gameState: Partial<GameState>) {
+    this.gameState = {...this.gameState, ...gameState};
     const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName();
     const roundInProgress = this.gameState.currentCharacter && !this.gameState.playedCharacters.includes(this.gameState.currentCharacter);
 
     if (roundInProgress) {
-      this.roundStatus = GameRoundStatus.PLAYING;
+      // TODO: add in logic to allow or continuing game play
     } else {
       if (isCurrentPlayer) {
         this.showChooseCharacterModal();
@@ -289,14 +286,12 @@ export class ActiveGameComponent implements OnInit {
     // indicate that the game has started
     rtService.gameStarted().subscribe(() => {
       this.game.update(game => ({ ...game, status: this.GAME_ACTIVE }));
-      this.setGameState({ playedCharacters: [] });
     });
 
     // trigger the countdown as well as the player to choose c character
-    rtService.roundCountdownInitiated().subscribe(currentPlayer => {
-      this.setGameState({ ...this.gameState, currentPlayer });
+    rtService.roundCountdownInitiated().subscribe(gameState => {
+      this.setGameState(gameState);
 
-      this.roundStatus = GameRoundStatus.INTERVAL;
       this.currentIntervalCountdown = this.game().maxIntervalBetweenRoundsInSecs;
       this.currentIntervalCountdownIntervalId = setInterval(() => {
         this.currentIntervalCountdown -= 1;
@@ -310,17 +305,14 @@ export class ActiveGameComponent implements OnInit {
     });
 
     // trigger the countdown for the game round
-    rtService.roundStarted().subscribe(({ playerUserName, character }) => {
-      this.setGameState({ ...this.gameState, currentPlayer: playerUserName, currentCharacter: character });
+    rtService.roundStarted().subscribe((gameState) => {
+      this.setGameState(gameState);
 
       // cancel the interval countdown
       this.currentIntervalCountdown = 0;
       if (this.currentIntervalCountdownIntervalId) {
         clearInterval(this.currentIntervalCountdownIntervalId)
       }
-
-      // set the game round status
-      this.roundStatus = GameRoundStatus.PLAYING;
 
       // start the round countdown
       this.currentRoundCountdown = this.game().maxRoundDurationInSecs;
@@ -345,10 +337,8 @@ export class ActiveGameComponent implements OnInit {
     });
 
     // force submission and display round plays
-    rtService.roundEnded().subscribe(async ({character}) => {
-      if (this.gameState.currentCharacter !== character) {
-        console.error('For some reason we received an end for the wrong character', {character});
-      }
+    rtService.roundEnded().subscribe(async (gameState) => {
+      this.setGameState(gameState);
 
       await this.submitRound()
       this.showRoundEndedModal();
