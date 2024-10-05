@@ -81,8 +81,8 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         await game.SaveAsync();
 
         // notify the other users that the game is started and the countdown should start
-        await gameHub.Clients.All.GameStarted(gameCode);
-        await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State.CurrentPlayer!);
+        await gameHub.Clients.All.GameStarted(gameCode, game.State);
+        await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State);
 
         return Ok(mapper.Map<GameRes>(game));
     }
@@ -105,7 +105,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         await game.SaveAsync();
 
         // notify the other users that the game is started and the countdown should start
-        await gameHub.Clients.All.RoundStarted(gameCode, req.PlayerUsername, req.Character);
+        await gameHub.Clients.All.RoundStarted(gameCode, game.State);
 
         return Ok(mapper.Map<GameRes>(game));
     }
@@ -183,7 +183,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         // if the play is submitted by the current player, then the round is over
         if (game.State.CurrentPlayer == userName)
-            await gameHub.Clients.All.RoundEnded(gameCode, req.Character);
+            await gameHub.Clients.All.RoundEnded(gameCode, game.State);
 
         return Ok(play);
     }
@@ -244,7 +244,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         else
         {
             // notify the other users that a new round countdown should be started
-            await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State.CurrentPlayer!);
+            await gameHub.Clients.All.RoundCountdownInitiated(gameCode, game.State);
         }
 
         return Ok();
