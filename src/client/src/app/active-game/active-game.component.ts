@@ -265,13 +265,33 @@ export class ActiveGameComponent implements OnInit {
     const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName();
     const roundInProgress = this.gameState.currentCharacter && !this.gameState.playedCharacters.includes(this.gameState.currentCharacter);
 
-    if (roundInProgress) {
+    if (this.gameState.roundStatus === GameRoundStatus.PLAYING) {
       // TODO: add in logic to allow or continuing game play
+      const timeRemaining = this.game().maxRoundDurationInSecs - this.gameState.secsSinceStatusChange;
+
+      if (timeRemaining <= 0) {
+        this.submitRound().then(() => console.log('Triggered a submission afrer loading the page'));
+      } else {
+        this.startRoundCountdown(timeRemaining);
+      }
     } else {
       if (isCurrentPlayer) {
         this.showChooseCharacterModal();
       }
     }
+  }
+
+  private startRoundCountdown(timeInSecs: number) {
+    this.currentRoundCountdown = timeInSecs;
+    this.currentRoundCountdownIntervalId = setInterval(() => {
+      this.currentRoundCountdown -= 1;
+      if (this.currentRoundCountdown === 0) {
+        clearInterval(this.currentRoundCountdownIntervalId);
+        this.submitRound().then(() => {
+          console.log('Round submitted after timeout');
+        });
+      }
+    }, 1000);
   }
 
   private addRtListeners(rtService: GameRealTimeService) {
@@ -315,17 +335,7 @@ export class ActiveGameComponent implements OnInit {
       }
 
       // start the round countdown
-      this.currentRoundCountdown = this.game().maxRoundDurationInSecs;
-      this.currentRoundCountdownIntervalId = setInterval(() => {
-        this.currentRoundCountdown -= 1;
-        if (this.currentRoundCountdown === 0) {
-          clearInterval(this.currentRoundCountdownIntervalId);
-          this.submitRound().then(() => {
-            console.log('Round submitted after timeout');
-          });
-        }
-      }, 1000);
-    });
+      this.startRoundCountdown(this.game().maxRoundDurationInSecs);
 
     // record round user plays
     rtService.roundPlaySubmitted().subscribe(({character, userName, columnValues}) => {
