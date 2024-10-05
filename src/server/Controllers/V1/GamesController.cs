@@ -111,7 +111,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
     }
 
     [HttpGet("{gameCode}/state")]
-    [ProducesResponseType(typeof(GameState), 200)]
+    [ProducesResponseType(typeof(GameStateRes), 200)]
     [ProducesResponseType(typeof(GenericRes), 400)]
     [ProducesResponseType(typeof(GenericRes), 404)]
     public async Task<IActionResult> GetGameState(string gameCode)
@@ -124,7 +124,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         if (game.Status is not GameStatus.Active)
             return BadRequest("Only active games can provide state");
 
-        return Ok(game.State);
+        return Ok(mapper.Map<GameStateRes>(game.State));
     }
 
     [HttpGet("{gameCode}/players/{userName}/plays")]

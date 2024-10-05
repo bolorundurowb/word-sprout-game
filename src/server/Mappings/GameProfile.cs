@@ -19,5 +19,18 @@ public class GameProfile : Profile
                 dst => dst.Status,
                 opt => opt.MapFrom(src => src.Status.ToString())
             );
+
+        CreateMap<GameState, GameStateRes>()
+            .ForMember(
+                dst => dst.RoundStatus,
+                opt => opt.MapFrom(src => src.RoundStatus.ToString())
+            )
+            .ForMember(
+                dst => dst.SecsSinceStatusChange,
+                opt => opt.MapFrom(src =>
+                    src.RoundStatusSetAt.HasValue
+                        ? (DateTimeOffset.UtcNow - src.RoundStatusSetAt.Value).TotalSeconds
+                        : 0)
+            );
     }
 }
