@@ -104,7 +104,7 @@ export class ActiveGameComponent implements OnInit {
       // if game status is active get the current state and user plays
       if (this.isGameActive()) {
         this.setGameState(await this.gameService.getState(this.gameCode));
-        this.currentUserPlays = await this.gameService.getPlays(this.gameCode, this.currentUserName());
+        this.currentUserPlays = await this.gameService.getUserPlays(this.gameCode, this.currentUserName());
       }
 
       // initialize the play row data
@@ -165,13 +165,27 @@ export class ActiveGameComponent implements OnInit {
 
       const character = this.gameState.currentCharacter!;
       console.log('About to submit round', this.currentUserPlays, character);
-      const res = await this.gameService.submitPlay(this.gameCode, this.currentUserName(), character, this.currentUserPlays[character]);
+      const res = await this.gameService.submitUserPlay(this.gameCode, this.currentUserName(), character, this.currentUserPlays[character]);
       // TODO: display the submitted play
       console.log('------------->', res, '<----------->')
       console.log('Round submitted');
       this.currentUserPlays[res.character] = res.columnValues;
 
       this.dismissRoundConfirmationModal();
+    } catch (e) {
+      this.toasts.showError(parseErrorMessage(e));
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async scoreRound() {
+    this.isLoading = true;
+
+    try {
+
+
+      this.dismissRoundEndedModal();
     } catch (e) {
       this.toasts.showError(parseErrorMessage(e));
     } finally {
@@ -263,14 +277,15 @@ export class ActiveGameComponent implements OnInit {
   private setGameState(gameState: Partial<GameState>) {
     this.gameState = {...this.gameState, ...gameState};
     const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName();
-    const roundInProgress = this.gameState.currentCharacter && !this.gameState.playedCharacters.includes(this.gameState.currentCharacter);
+    const roundInProgress = this.gameState.currentCharacter
+      && !this.gameState.playedCharacters.includes(this.gameState.currentCharacter);
 
     if (this.gameState.roundStatus === GameRoundStatus.PLAYING) {
       // TODO: add in logic to allow or continuing game play
       const timeRemaining = this.game().maxRoundDurationInSecs - this.gameState.secsSinceStatusChange;
 
       if (timeRemaining <= 0) {
-        this.submitRound().then(() => console.log('Triggered a submission afrer loading the page'));
+        this.submitRound().then(() => console.log('Triggered a submission after loading the page'));
       } else {
         this.startRoundCountdown(timeRemaining);
       }
@@ -308,7 +323,7 @@ export class ActiveGameComponent implements OnInit {
       this.game.update(game => ({ ...game, status: this.GAME_ACTIVE }));
     });
 
-    // trigger the countdown as well as the player to choose c character
+    // trigger the countdown as well as the player to choose a character
     rtService.roundCountdownInitiated().subscribe(gameState => {
       this.setGameState(gameState);
 
@@ -336,6 +351,7 @@ export class ActiveGameComponent implements OnInit {
 
       // start the round countdown
       this.startRoundCountdown(this.game().maxRoundDurationInSecs);
+    });
 
     // record round user plays
     rtService.roundPlaySubmitted().subscribe(({character, userName, columnValues}) => {
@@ -357,6 +373,7 @@ export class ActiveGameComponent implements OnInit {
     // show the winner details and score breakdown
     rtService.gameOver().subscribe(({ winningPlayers, playerScores }) => {
       // TODO: display winners and prompt to play again
+      console.log('Game over', winningPlayers, playerScores);
       this.toasts.showSuccess('Game over. Thanks for playing!');
     });
   }

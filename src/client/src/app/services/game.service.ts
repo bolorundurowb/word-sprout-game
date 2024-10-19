@@ -5,7 +5,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { Play } from "../app.types";
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -14,19 +13,16 @@ export class GameService {
   constructor(private http: HttpClient) {
   }
 
-  getByCode(gameCode: string) {
-    return this.http.get(`${this.BASE_API}/${gameCode}`)
-      .toPromise();
+  getByCode(gameCode: string): Promise<any> {
+    return firstValueFrom(this.http.get(`${this.BASE_API}/${gameCode}`));
   }
 
-  create(payload: any) {
-    return this.http.post(this.BASE_API, payload)
-      .toPromise();
+  create(payload: any): Promise<any> {
+    return firstValueFrom(this.http.post(this.BASE_API, payload));
   }
 
-  join(payload: any) {
-    return this.http.post(`${this.BASE_API}/${payload.gameCode}/join`, { userName: payload.username })
-      .toPromise();
+  join(payload: any): Promise<any> {
+    return firstValueFrom(this.http.post(`${this.BASE_API}/${payload.gameCode}/join`, { userName: payload.username }));
   }
 
   start(gameCode: string): Promise<any> {
@@ -44,15 +40,25 @@ export class GameService {
     }));
   }
 
-  getPlays(gameCode: string, userName: string): Promise<any> {
+  getUserPlays(gameCode: string, userName: string): Promise<any> {
     return firstValueFrom(this.http.get(`${this.BASE_API}/${gameCode}/players/${userName}/plays`));
   }
 
-  submitPlay(gameCode: string, userName: string, character: string, entries: any): Promise<any> {
+  submitUserPlay(gameCode: string, userName: string, character: string, entries: any): Promise<any> {
     return firstValueFrom(
       this.http.post(`${this.BASE_API}/${gameCode}/players/${userName}/plays`, {
         character,
         columnValues: entries
+      })
+    );
+  }
+
+  scoreRound(gameCode: string, userName: string, character: string, playerScores: Record<string, number>): Promise<any> {
+    return firstValueFrom(
+      this.http.post(`${this.BASE_API}/${gameCode}/score-round`, {
+        character,
+        playerScores,
+        username: userName,
       })
     );
   }
