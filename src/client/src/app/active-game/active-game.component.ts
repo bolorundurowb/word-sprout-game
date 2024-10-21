@@ -12,9 +12,9 @@ import { GameRoundRowComponent } from '../components/game-round-row.component';
 import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 import { TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ScoreGameRowComponent } from "../components/score-game-row.component";
-import { Game, GameRoundStatus, GameState, RowData } from "../app.types";
-import { parseErrorMessage } from "../app.utils";
+import { Game, GameRoundStatus, GameState, RowData } from '../app.types';
+import { parseErrorMessage } from '../app.utils';
+import { ScoreGameRoundRowComponent } from '../components/score-game.component';
 
 @Component({
   selector: 'ws-active-game',
@@ -38,7 +38,7 @@ import { parseErrorMessage } from "../app.utils";
     TuiDataList,
     TuiDialog,
     NgClass,
-    ScoreGameRowComponent,
+    ScoreGameRoundRowComponent,
   ],
   templateUrl: 'active-game.component.html',
   styleUrl: 'active-game.component.scss'
@@ -54,7 +54,7 @@ export class ActiveGameComponent implements OnInit {
 
   @ViewChild('chooseCharacter') chooseCharacterTemplate: PolymorpheusContent<TuiDialogContext> | null = null;
 
-  avatarColors = ['#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99'];
+  avatarColors = [ '#a2b9bc', '#6b5b95', '#feb236', '#d64161', '#ff7b25', '#b2ad7f', '#878f99' ];
   gameCode: string = '';
   joinGameUrl: string = '';
   game: WritableSignal<Game> = signal({} as Game);
@@ -117,7 +117,7 @@ export class ActiveGameComponent implements OnInit {
     } catch (e) {
       console.error(e);
       this.toasts.showError(parseErrorMessage(e));
-      await this.router.navigate(['/']);
+      await this.router.navigate([ '/' ]);
     }
   }
 
@@ -167,7 +167,7 @@ export class ActiveGameComponent implements OnInit {
       console.log('About to submit round', this.currentUserPlays, character);
       const res = await this.gameService.submitUserPlay(this.gameCode, this.currentUserName(), character, this.currentUserPlays[character]);
       // TODO: display the submitted play
-      console.log('------------->', res, '<----------->')
+      console.log('------------->', res, '<----------->');
       console.log('Round submitted');
       this.currentUserPlays[res.character] = res.columnValues;
 
@@ -275,7 +275,7 @@ export class ActiveGameComponent implements OnInit {
   }
 
   private setGameState(gameState: Partial<GameState>) {
-    this.gameState = {...this.gameState, ...gameState};
+    this.gameState = { ...this.gameState, ...gameState };
     const isCurrentPlayer = this.gameState.currentPlayer === this.currentUserName();
     const roundInProgress = this.gameState.currentCharacter
       && !this.gameState.playedCharacters.includes(this.gameState.currentCharacter);
@@ -346,7 +346,7 @@ export class ActiveGameComponent implements OnInit {
       // cancel the interval countdown
       this.currentIntervalCountdown = 0;
       if (this.currentIntervalCountdownIntervalId) {
-        clearInterval(this.currentIntervalCountdownIntervalId)
+        clearInterval(this.currentIntervalCountdownIntervalId);
       }
 
       // start the round countdown
@@ -354,9 +354,13 @@ export class ActiveGameComponent implements OnInit {
     });
 
     // record round user plays
-    rtService.roundPlaySubmitted().subscribe(({character, userName, columnValues}) => {
+    rtService.roundPlaySubmitted().subscribe(({ character, userName, columnValues }) => {
       if (this.gameState.currentCharacter !== character) {
-        console.error('For some reason we received a play for the wrong character', {userName, character, columnValues});
+        console.error('For some reason we received a play for the wrong character', {
+          userName,
+          character,
+          columnValues
+        });
       } else {
         this.currentRoundPlays[userName] = columnValues;
       }
@@ -366,7 +370,7 @@ export class ActiveGameComponent implements OnInit {
     rtService.roundEnded().subscribe(async (gameState) => {
       this.setGameState(gameState);
 
-      await this.submitRound()
+      await this.submitRound();
       this.showRoundEndedModal();
     });
 

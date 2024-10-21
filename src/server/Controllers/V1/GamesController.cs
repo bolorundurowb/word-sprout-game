@@ -181,7 +181,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
 
         await gameHub.Clients.All.RoundPlaySubmitted(gameCode, userName, req.Character, req.ColumnValues);
 
-        // if the play is submitted by the current player, then the round is over
+        // if the play is submitted by the current round comptroller, then the round is over
         if (game.State.CurrentPlayer == userName)
             await gameHub.Clients.All.RoundEnded(gameCode, game.State);
 

@@ -1,4 +1,6 @@
-export type RowData = Record<string, string | null | undefined>;
+export type RowDataKey = string;
+export type RowDataValue = string | null | undefined;
+export type RowData = Record<RowDataKey, RowDataValue>;
 
 export interface Play {
   character: string;
