@@ -7,14 +7,14 @@ namespace WordSproutApi.Controllers;
 public abstract class BaseApiController : ControllerBase
 {
     [NonAction]
-    public BadRequestObjectResult BadRequest(string message) => BadRequest(new GenericRes(message));
+    protected BadRequestObjectResult BadRequest(string message) => BadRequest(new GenericRes(message));
 
     [NonAction]
-    public ConflictObjectResult Conflict(string message) => Conflict(new GenericRes(message));
+    protected ConflictObjectResult Conflict(string message) => Conflict(new GenericRes(message));
 
     [NonAction]
-    public NotFoundObjectResult NotFound(string message) => NotFound(new GenericRes(message));
+    protected NotFoundObjectResult NotFound(string message) => NotFound(new GenericRes(message));
 
     [NonAction]
-    public ForbidResult Forbidden() => new ForbidResult();
+    protected ForbidResult Forbidden() => new();
 }
