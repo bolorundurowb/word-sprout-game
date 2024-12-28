@@ -130,7 +130,8 @@ export class ActiveGameComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      this.game.set(await this.gameService.start(this.gameCode));
+      const game = await this.gameService.start(this.gameCode);
+      this.game.set(game);
     } catch (e) {
       this.toasts.showError((e as any)?.error?.message ?? 'Something went wrong');
     } finally {
