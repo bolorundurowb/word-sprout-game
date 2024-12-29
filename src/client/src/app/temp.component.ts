@@ -8,6 +8,7 @@ import { ScoreGameRoundComponent } from './components/score-game.component';
   template: `
     <h1>Temp</h1>
     <ws-score-game-round
+      [allowEdit]="true"
       [columns]="columns"
       [character]="character"
       [playerEntries]="playerEntries">
@@ -25,6 +26,13 @@ export class TempComponent {
       'Place': 'ungle',
       'Food': 'Jelly',
       'Thing/Item': null
+    },
+    'james': {
+      'Name': 'James',
+      'Animal': 'Jellyfish',
+      'Place': 'Jungle',
+      'Food': 'Jelly',
+      'Thing/Item': "Joint"
     }
   };
 }

@@ -1,4 +1,4 @@
-import { Component, computed, EventEmitter, Input, Output, Signal } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, Output } from '@angular/core';
 import { RowData, RowDataValue } from '../app.types';
 import { JsonPipe, KeyValuePipe, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +24,8 @@ import { FormsModule } from '@angular/forms';
         type="number"
         [disabled]="!columnValue || !allowEdit"
         [value]="cellScore"
-        (click)="cellScoreInputHandler($event)"/>
+        (click)="cellScoreInputHandler($event)"
+        (change)="cellScoreChangeHandler($event)"/>
     </div>
   `,
   imports: [
@@ -40,10 +41,10 @@ import { FormsModule } from '@angular/forms';
       align-items: center;
       justify-content: space-between;
       height: 2rem;
-      width: 10rem;
+      width: 9rem;
       max-width: 12rem;
-      margin-left: 0.5rem;
-      margin-right: 0.5rem;
+      margin-left: 0.25rem;
+      margin-right: 0.25rem;
     }
 
     .score-cell-container input {
@@ -53,7 +54,7 @@ import { FormsModule } from '@angular/forms';
     }
   `
 })
-export class ScoreGameRoundCellComponent {
+export class ScoreGameRoundCellComponent implements AfterViewInit {
   @Input() columnName = '';
   @Input() columnValue: RowDataValue = null;
   @Input() allowEdit: boolean = false;
@@ -63,10 +64,27 @@ export class ScoreGameRoundCellComponent {
     value: number
   }>();
 
+  ngAfterViewInit() {
+    if (this.cellScore > 0) {
+      this.cellScoreChanged.emit({ columnName: this.columnName, value: this.cellScore });
+    }
+  }
+
   cellScoreInputHandler = (event: Event) => {
     const target = event.target as HTMLInputElement;
     const value = +target.value;
     this.cellScoreChanged.emit({ columnName: this.columnName, value });
+  };
+
+  cellScoreChangeHandler = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const value = +target.value;
+
+    if (value < 0) {
+      this.cellScore = 0;
+    } else {
+      this.cellScoreChanged.emit({ columnName: this.columnName, value });
+    }
   };
 }
 
@@ -78,9 +96,10 @@ export class ScoreGameRoundCellComponent {
       <span class="username">{{ userName }}:</span>
       <ng-container *ngFor="let column of columns">
         <ws-score-game-round-cell
-          [allowEdit]="true"
+          [allowEdit]="allowEdit"
           [columnName]="column"
           [columnValue]="columnEntries[column]"
+          [cellScore]="computeValueInitialScore(column)"
           (cellScoreChanged)="handleScoreChanged($event)">
         </ws-score-game-round-cell>
       </ng-container>
@@ -96,33 +115,41 @@ export class ScoreGameRoundCellComponent {
   ],
   styles: `
     .score-row-container {
-      padding-left: 0.2rem;
-      padding-right: 0.2rem;
+      padding: 0.275rem 0.2rem;
     }
 
     .score-row-container .username {
       font-weight: bold;
       font-size: 1rem;
+      width: 4.5rem;
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .score-row-container .total-score {
       font-weight: bold;
-      font-size: 1.1rem;
-      margin-left: 1.5rem;
+      font-size: 1.5rem;
+      padding: 0.25rem;
+      margin-top: 0.2rem;
+      margin-left: 1rem;
       border: 0.1rem solid #BABABA;
-      padding: 0.25rem 0.5rem;
       border-radius: 0.25rem;
       height: 2rem;
-      width: 3rem;
+      width: 2rem;
       display: inline-block;
-      margin-top: -1rem;
+      text-align: center;
     }
   `
 })
 export class ScoreGameRoundRowComponent {
+  @Input() character: string = '';
   @Input() userName: string = '';
+  @Input() allowEdit = false;
   @Input() columns: string[] = [];
   @Input() columnEntries: RowData = {};
+  @Input() otherPlayerEntries: Record<string, RowData> = {};
 
   columnScores: Record<string, number> = {};
   totalScore: number = Object.values(this.columnScores).reduce((acc, item) => acc + +(item ?? 0), 0);
@@ -131,6 +158,26 @@ export class ScoreGameRoundRowComponent {
     this.columnScores[event.columnName] = event.value;
     this.totalScore = Object.values(this.columnScores).reduce((acc, item) => acc + +(item ?? 0), 0);
   };
+
+  computeValueInitialScore(columnName: string): number {
+    const columnEntry = this.columnEntries[columnName]?.trim().toLowerCase();
+
+    // if the user did not write anything, or it does not start with the character being played, then the core is zero
+    if (!columnEntry || !columnEntry.startsWith(this.character.toLowerCase())) {
+      return 0;
+    }
+
+    // if another player has written the same value, then the core is halved
+    let entryPlayedByOtherPlayer = false;
+    for (const [player, playerEntries] of Object.entries(this.otherPlayerEntries)) {
+      if (playerEntries[columnName]?.trim().toLowerCase() === columnEntry) {
+        entryPlayedByOtherPlayer = true;
+        break;
+      }
+    }
+
+    return entryPlayedByOtherPlayer ? 5 : 10
+  }
 }
 
 @Component({
@@ -140,9 +187,12 @@ export class ScoreGameRoundRowComponent {
     <div>
       <ng-container *ngFor="let item of playerEntries | keyvalue">
         <ws-score-game-round-row
+          [character]="character"
           [columns]="columns"
+          [allowEdit]="allowEdit"
           [userName]="item.key"
-          [columnEntries]="item.value"/>
+          [columnEntries]="item.value"
+          [otherPlayerEntries]="getOtherPlayersEntries(item.key)"/>
       </ng-container>
     </div>
   `,
@@ -157,6 +207,12 @@ export class ScoreGameRoundRowComponent {
 })
 export class ScoreGameRoundComponent {
   @Input() character: string = '';
+  @Input() allowEdit = false;
   @Input() columns: string[] = [];
   @Input() playerEntries: Record<string, RowData> = {};
+
+  getOtherPlayersEntries(userName: string): Record<string, RowData> {
+    const { [userName]: _, ...rest } = this.playerEntries;
+    return rest;
+  }
 }
