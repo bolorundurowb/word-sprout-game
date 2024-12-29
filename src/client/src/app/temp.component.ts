@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RowData } from './app.types';
 import { ScoreGameRoundComponent } from './components/score-game.component';
 
@@ -11,12 +11,13 @@ import { ScoreGameRoundComponent } from './components/score-game.component';
       [allowEdit]="true"
       [columns]="columns"
       [character]="character"
-      [playerEntries]="playerEntries">
+      [playerEntries]="playerEntries"
+      (playerScoresChanged)="logPlayerScoreChanges($event)">
     </ws-score-game-round>
   `,
   imports: [ ScoreGameRoundComponent ]
 }))
-export class TempComponent {
+export class TempComponent implements OnInit, OnDestroy {
   columns = [ 'Name', 'Animal', 'Place', 'Food', 'Thing/Item' ];
   character = 'J';
   playerEntries: Record<string, RowData> = {
@@ -32,7 +33,24 @@ export class TempComponent {
       'Animal': 'Jellyfish',
       'Place': 'Jungle',
       'Food': 'Jelly',
-      'Thing/Item': "Joint"
+      'Thing/Item': 'Joint'
     }
   };
+
+  intervalId?: any;
+  millisecondsElapsed = 0;
+
+  ngOnInit() {
+   this.intervalId = setInterval(() => {
+      this.millisecondsElapsed += 1;
+    }, 1);
+  }
+
+  logPlayerScoreChanges(event: Record<string, number>) {
+    console.log('Player scores changed', event, 'after', this.millisecondsElapsed, 'ms');
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.intervalId);
+  }
 }

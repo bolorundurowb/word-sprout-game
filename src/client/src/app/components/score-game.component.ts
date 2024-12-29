@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { RowData, RowDataValue } from '../app.types';
 import { JsonPipe, KeyValuePipe, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -54,7 +54,7 @@ import { FormsModule } from '@angular/forms';
     }
   `
 })
-export class ScoreGameRoundCellComponent implements AfterViewInit {
+export class ScoreGameRoundCellComponent {
   @Input() columnName = '';
   @Input() columnValue: RowDataValue = null;
   @Input() allowEdit: boolean = false;
@@ -63,12 +63,6 @@ export class ScoreGameRoundCellComponent implements AfterViewInit {
     columnName: string,
     value: number
   }>();
-
-  ngAfterViewInit() {
-    if (this.cellScore > 0) {
-      this.cellScoreChanged.emit({ columnName: this.columnName, value: this.cellScore });
-    }
-  }
 
   cellScoreInputHandler = (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -99,7 +93,7 @@ export class ScoreGameRoundCellComponent implements AfterViewInit {
           [allowEdit]="allowEdit"
           [columnName]="column"
           [columnValue]="columnEntries[column]"
-          [cellScore]="computeValueInitialScore(column)"
+          [cellScore]="columnScores[column]"
           (cellScoreChanged)="handleScoreChanged($event)">
         </ws-score-game-round-cell>
       </ng-container>
@@ -143,7 +137,7 @@ export class ScoreGameRoundCellComponent implements AfterViewInit {
     }
   `
 })
-export class ScoreGameRoundRowComponent {
+export class ScoreGameRoundRowComponent implements OnInit {
   @Input() character: string = '';
   @Input() userName: string = '';
   @Input() allowEdit = false;
@@ -151,15 +145,34 @@ export class ScoreGameRoundRowComponent {
   @Input() columnEntries: RowData = {};
   @Input() otherPlayerEntries: Record<string, RowData> = {};
 
+  @Output() totalScoreChanged = new EventEmitter<{ userName: string, score: number }>();
+
   columnScores: Record<string, number> = {};
-  totalScore: number = Object.values(this.columnScores).reduce((acc, item) => acc + +(item ?? 0), 0);
+  totalScore: number = 0;
+
+  ngOnInit() {
+    for (const column of this.columns) {
+      this.columnScores[column] = this.computeValueInitialScore(column);
+    }
+
+    this.recomputeTotalScore();
+  }
 
   handleScoreChanged = (event: { columnName: string, value: number }) => {
     this.columnScores[event.columnName] = event.value;
-    this.totalScore = Object.values(this.columnScores).reduce((acc, item) => acc + +(item ?? 0), 0);
+    this.recomputeTotalScore();
   };
 
-  computeValueInitialScore(columnName: string): number {
+  private recomputeTotalScore(): void {
+    const computedScore = Object.values(this.columnScores)
+      .reduce((acc, item) => acc + +(item ?? 0), 0);
+    if (computedScore !== this.totalScore) {
+      this.totalScore = computedScore;
+      this.totalScoreChanged.emit({ userName: this.userName, score: computedScore });
+    }
+  }
+
+  private computeValueInitialScore(columnName: string): number {
     const columnEntry = this.columnEntries[columnName]?.trim().toLowerCase();
 
     // if the user did not write anything, or it does not start with the character being played, then the core is zero
@@ -169,14 +182,14 @@ export class ScoreGameRoundRowComponent {
 
     // if another player has written the same value, then the core is halved
     let entryPlayedByOtherPlayer = false;
-    for (const [player, playerEntries] of Object.entries(this.otherPlayerEntries)) {
+    for (const [ player, playerEntries ] of Object.entries(this.otherPlayerEntries)) {
       if (playerEntries[columnName]?.trim().toLowerCase() === columnEntry) {
         entryPlayedByOtherPlayer = true;
         break;
       }
     }
 
-    return entryPlayedByOtherPlayer ? 5 : 10
+    return entryPlayedByOtherPlayer ? 5 : 10;
   }
 }
 
@@ -192,7 +205,8 @@ export class ScoreGameRoundRowComponent {
           [allowEdit]="allowEdit"
           [userName]="item.key"
           [columnEntries]="item.value"
-          [otherPlayerEntries]="getOtherPlayersEntries(item.key)"/>
+          [otherPlayerEntries]="getOtherPlayersEntries(item.key)"
+          (totalScoreChanged)="handleTotalScoreChanged($event)"/>
       </ng-container>
     </div>
   `,
@@ -210,6 +224,15 @@ export class ScoreGameRoundComponent {
   @Input() allowEdit = false;
   @Input() columns: string[] = [];
   @Input() playerEntries: Record<string, RowData> = {};
+
+  @Output() playerScoresChanged = new EventEmitter<Record<string, number>>();
+
+  playerScores: Record<string, number> = {};
+
+  handleTotalScoreChanged = (event: { userName: string, score: number }) => {
+    this.playerScores[event.userName] = event.score;
+    this.playerScoresChanged.emit(this.playerScores);
+  };
 
   getOtherPlayersEntries(userName: string): Record<string, RowData> {
     const { [userName]: _, ...rest } = this.playerEntries;
