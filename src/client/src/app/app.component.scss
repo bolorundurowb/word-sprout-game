@@ -6,6 +6,10 @@
     cursor: pointer;
   }
 
+  .main {
+    height: calc(100vh - 14.5rem);
+  }
+
   .footer {
     text-align: center;
     margin-top: 2rem;
