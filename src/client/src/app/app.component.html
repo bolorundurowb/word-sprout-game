@@ -1,14 +1,16 @@
 <tui-root>
   <div class="app">
-    <h2 tuiTitle="l"
-        (click)="goHome()">
-      Word Sprout
-      <div tuiSubtitle>
-        A game of wit and swift
-      </div>
-    </h2>
+    <div class="header">
+      <h2 tuiTitle="l"
+          (click)="goHome()">
+        Word Sprout
+        <div tuiSubtitle>
+          A game of wit and swift
+        </div>
+      </h2>
 
-    <div class="ws-divider"></div>
+      <div class="ws-divider"></div>
+    </div>
 
     <div class="main">
       <router-outlet></router-outlet>

@@ -1,18 +1,42 @@
 .app {
   padding-top: 1.2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 
-  h2 {
-    text-align: center;
-    cursor: pointer;
+  .header {
+    background-color: white;
+    top: 0;
+    width: 100%;
+    position: fixed;
+    z-index: 2;
+    padding-top: 1.75rem;
+    padding-bottom: 0.5rem;
+
+    h2 {
+      text-align: center;
+      cursor: pointer;
+
+      div {
+        margin-bottom: 1rem;
+      }
+    }
   }
 
   .main {
-    height: calc(100vh - 14.5rem);
+    flex: 1;
+    margin-top: 8rem;
+    margin-bottom: 8rem;
   }
 
   .footer {
+    background-color: white;
+    bottom: 0;
+    width: 100%;
+    position: fixed;
+    z-index: 2;
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
     text-align: center;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
   }
 }
