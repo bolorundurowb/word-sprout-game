@@ -1,0 +1,54 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 14.5rem);
+
+  .container {
+    width: 50%;
+    margin-top: -10rem;
+
+    .page-header {
+      text-align: center;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .page-sub-header {
+      text-align: center;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .page-content {
+      text-align: left;
+      font-size: 1rem;
+      line-height: 1.75rem;
+
+      ul {
+        padding: 0;
+        margin-left: 2.5rem;
+
+        li {
+          margin-top: 0.5rem;
+          margin-bottom: 0.5rem;
+          text-align: left;
+
+          span {
+            font-weight: bold;
+          }
+        }
+      }
+    }
+
+    .page-contact-text {
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 2rem;
+    }
+  }
+}
