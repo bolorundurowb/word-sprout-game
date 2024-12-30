@@ -14,7 +14,7 @@ import { TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy'
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Game, GameRoundStatus, GameState, RowData } from '../app.types';
 import { parseErrorMessage } from '../app.utils';
-import { ScoreGameRoundRowComponent } from '../components/score-game.component';
+import { ScoreGameRoundComponent, ScoreGameRoundRowComponent } from '../components/score-game.component';
 
 @Component({
   selector: 'ws-active-game',
@@ -39,6 +39,7 @@ import { ScoreGameRoundRowComponent } from '../components/score-game.component';
     TuiDialog,
     NgClass,
     ScoreGameRoundRowComponent,
+    ScoreGameRoundComponent,
   ],
   templateUrl: 'active-game.component.html',
   styleUrl: 'active-game.component.scss'
@@ -83,10 +84,11 @@ export class ActiveGameComponent implements OnInit {
   currentRoundCountdownIntervalId?: any;
   currentRoundCountdown = 0;
   roundEntry: any;
-  currentRoundPlays: Record<string, RowData> = {};
 
   // round over state details
   isRoundEndedModalVisible = false;
+  currentRoundPlays: Record<string, RowData> = {};
+  currentRoundPlayerScores: Record<string, number> = {};
   endedRoundUserPlays: Record<string, RowData> = {};
 
 
@@ -184,9 +186,11 @@ export class ActiveGameComponent implements OnInit {
     this.isLoading = true;
 
     try {
-
+      const character = this.gameState.currentCharacter!;
+      await this.gameService.scoreRound(this.gameCode, this.currentUserName(), character, this.currentRoundPlayerScores);
 
       this.dismissRoundEndedModal();
+      this.currentRoundPlayerScores = {};
     } catch (e) {
       this.toasts.showError(parseErrorMessage(e));
     } finally {
@@ -224,8 +228,11 @@ export class ActiveGameComponent implements OnInit {
   }
 
   rowDataChanged(event: any) {
-    console.log(event);
     this.roundEntry = event;
+  }
+
+  playerScoresChanged(event: Record<string, number>) {
+    this.currentRoundPlayerScores = event;
   }
 
   protected isRowPlayed(character: string): boolean {

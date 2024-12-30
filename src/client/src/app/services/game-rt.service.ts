@@ -1,6 +1,6 @@
 import * as signalr from '@microsoft/signalr';
 import { Observable } from 'rxjs';
-import { GameState, RoundEndedEvent, RoundPlaySubmittedEvent } from "../app.types";
+import { GameState, RoundPlaySubmittedEvent } from "../app.types";
 
 export class GameRealTimeService {
   private hubConnection: signalr.HubConnection;
