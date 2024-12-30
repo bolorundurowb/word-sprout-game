@@ -6,11 +6,11 @@
 }
 
 body {
-  font-family: var(--tui-font-text);
+  font-family: var(--tui-font-text), sans-serif;
 }
 
 .ws-button {
-  font-family: var(--tui-font-text);
+  font-family: var(--tui-font-text), sans-serif;
   font-weight: 500;
   font-size: 0.9rem;
   text-transform: lowercase;
