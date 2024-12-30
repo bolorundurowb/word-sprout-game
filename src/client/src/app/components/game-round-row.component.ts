@@ -22,7 +22,7 @@ export interface GameRoundData {
     FormsModule,
   ],
   template: `
-    <td>{{ character }}</td>
+    <td class="char">{{ character }}</td>
     <ng-container *ngFor="let column of columns">
       <td>
         <tui-input
@@ -32,7 +32,7 @@ export interface GameRoundData {
           <input
             name="ws-gr-{{column}}"
             tuiTextfieldLegacy
-            [disabled]="!enabled"
+            [disabled]="!charPlayed && !charBeingPlayed"
             (drop)="disableEvent($event)"
             (paste)="disableEvent($event)"
           />
@@ -45,8 +45,20 @@ export interface GameRoundData {
     <ng-content></ng-content>
   `,
   styles: `
+    :host {
+      color: red;
+    }
+
     td {
       padding: 0.2rem 0.5rem;
+
+      &.char {
+        text-align: center;
+      }
+
+      &.column {
+        width: calc(20% - 2rem);
+      }
     }
   `
 })
@@ -54,15 +66,12 @@ export class GameRoundRowComponent {
   @Input() columns: string[] = [];
   @Input() character: string = '';
   @Input() score?: number;
-  @Input() enabled = true;
 
-  // @ts-ignore
-  @Input() data: RowData;
+  @Input() charPlayed = false;
+  @Input() charBeingPlayed = false;
+
+  @Input() data: RowData = {};
   @Output() dataChange = new EventEmitter<RowData>();
-
-  constructor() {
-    this.data = {};
-  }
 
   disableEvent(event: any) {
     event.preventDefault();

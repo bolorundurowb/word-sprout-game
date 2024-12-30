@@ -88,6 +88,11 @@
     font-weight: bold;
   }
 
+  .sub-header {
+    text-align: center;
+    font-size: 1.1rem;
+  }
+
   table {
     width: calc(100% - 4rem);
     margin: 1.5rem 2rem;
@@ -100,7 +105,7 @@
         }
 
         &.score {
-          width: 2rem;
+          width: 2.2rem;
         }
       }
     }

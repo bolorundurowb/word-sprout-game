@@ -76,7 +76,7 @@
       Game On: <i>{{ currentUserName() }}</i>!!
     </div>
 
-    <div>
+    <div class="sub-header">
       This round is led by <i>{{ gameState.currentPlayer }}</i>.
       <span *ngIf="gameState.roundStatus === GameRoundStatus.INTERVAL">They have <b>{{ currentIntervalCountdown }}</b> seconds to choose the character to be played</span>
       <span
@@ -92,7 +92,7 @@
           Character
         </th>
         <ng-container *ngFor="let column of game().columns">
-          <th>
+          <th [ngStyle]="getColumnStyle(game().columns.length)">
             {{ column }}
           </th>
         </ng-container>
@@ -106,11 +106,10 @@
       <tbody>
       <ng-container *ngFor="let char of game().characterSet">
         <tr wsGameRoundRow
-            [ngClass]="{'disabled-row': !isRowPlayable(char), 'played-row': isRowPlayed(char)}"
             [character]="char"
             [columns]="game().columns"
             [enabled]="isRowPlayable(char)"
-            [data]="currentUserPlays[char]"
+            [data]="currentUserPlays[char] || {}"
             (dataChange)="rowDataChanged($event)">
           <td>
             <ng-container *ngIf="isRowPlayable(char)">
@@ -192,7 +191,7 @@
   </div>
 </ng-template>
 
-<ng-template [(tuiDialog)]="isRoundEndedModalVisible">
+<ng-template [tuiDialogOptions]="{size: 'auto'}" [(tuiDialog)]="isRoundEndedModalVisible">
   <div class="modal">
     <div class="header">
       <ng-container *ngIf="isRoundComptroller()">

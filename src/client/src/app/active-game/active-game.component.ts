@@ -243,6 +243,17 @@ export class ActiveGameComponent implements OnInit {
       && character === this.gameState.currentCharacter;
   }
 
+  protected isCharacterBeingPlayed(character: string): boolean {
+    return this.gameState.roundStatus === GameRoundStatus.PLAYING
+      && character === this.gameState.currentCharacter;
+  }
+
+  protected getColumnStyle(columnCount: number): any {
+    const width = `${100 / columnCount}%`;
+    const deductionForFixedColumns = `${6.9 / columnCount}rem`;
+    return { width: `calc(${width} - ${deductionForFixedColumns})` };
+  }
+
   private hasPlayerSubmittedRow(character: string): boolean {
     return this.currentUserPlays[character] !== undefined;
   }
