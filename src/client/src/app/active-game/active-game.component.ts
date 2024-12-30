@@ -89,7 +89,6 @@ export class ActiveGameComponent implements OnInit {
   isRoundEndedModalVisible = false;
   currentRoundPlays: Record<string, RowData> = {};
   currentRoundPlayerScores: Record<string, number> = {};
-  endedRoundUserPlays: Record<string, RowData> = {};
 
 
   constructor(title: Title) {
