@@ -29,9 +29,7 @@ public class Game : Schema
     public GameState State { get; set; }
 
 #pragma warning disable CS8618
-    private Game()
-    {
-    }
+    private Game() { }
 #pragma warning restore CS8618
 
     public Game(string userName, int maxIntervalBetweenRoundsInSecs, int maxRoundDurationInSecs, List<string> columns,
@@ -59,7 +57,7 @@ public class Game : Schema
     public void Start()
     {
         Status = GameStatus.Active;
-        State.SetCurrentPlayer(InitiatedBy);
+        State.SetRoundComptroller(InitiatedBy);
     }
 
     public void StartRound(char character) => State.SetCurrentCharacter(character);
@@ -76,9 +74,9 @@ public class Game : Schema
         else
         {
             // choose next player
-            var currentPlayerIndex = Players.IndexOf(x => x.UserName == State.CurrentPlayer);
+            var currentPlayerIndex = Players.IndexOf(x => x.UserName == State.RoundComptroller);
             var nextPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
-            State.SetCurrentPlayer(Players[nextPlayerIndex].UserName);
+            State.SetRoundComptroller(Players[nextPlayerIndex].UserName);
         }
     }
 

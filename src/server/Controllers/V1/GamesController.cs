@@ -171,7 +171,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         if (player == null)
             return Forbidden();
 
-        var isRoundComptroller = game.State.CurrentPlayer == userName;
+        var isRoundComptroller = game.State.RoundComptroller == userName;
         var play = player.AddPlay(req.Character, req.ColumnValues);
 
         if (isRoundComptroller)
@@ -182,7 +182,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         await gameHub.Clients.All.RoundPlaySubmitted(gameCode, userName, req.Character, req.ColumnValues);
 
         // if the play is submitted by the current round comptroller, then the round is over
-        if (game.State.CurrentPlayer == userName)
+        if (game.State.RoundComptroller == userName)
             await gameHub.Clients.All.RoundEnded(gameCode, game.State);
 
         return Ok(play);
@@ -203,7 +203,7 @@ public class GamesController(IMapper mapper, IHubContext<GameHub, IGameHubClient
         if (game.Status is not GameStatus.Active)
             return BadRequest("Only active games can accept play scores");
 
-        if (game.State.CurrentPlayer != req.Username)
+        if (game.State.RoundComptroller != req.Username)
             return Forbidden();
 
         foreach (var playerScore in req.PlayerScores)

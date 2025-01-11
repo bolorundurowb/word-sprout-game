@@ -105,6 +105,13 @@
       </thead>
       <tbody>
       <ng-container *ngFor="let char of game().characterSet">
+<!--        <tr wsGameRoundRow-->
+<!--            [ngClass]="{'disabled-row': !isRowPlayable(char), 'played-row': isRowPlayed(char)}"-->
+<!--            [character]="char"-->
+<!--            [columns]="game().columns"-->
+<!--            [enabled]="isRowPlayable(char)"-->
+<!--            [data]="currentUserPlays[char] || {}"-->
+<!--            (dataChange)="rowDataChanged($event)">-->
         <tr wsGameRoundRow
             [character]="char"
             [columns]="game().columns"

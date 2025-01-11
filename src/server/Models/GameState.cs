@@ -8,7 +8,7 @@ public class GameState
 
     public List<char> PlayedCharacters { get; private set; }
 
-    public string? CurrentPlayer { get; private set; }
+    public string? RoundComptroller { get; private set; }
 
     public GameRoundStatus? RoundStatus { get; private set; }
 
@@ -16,9 +16,9 @@ public class GameState
 
     public GameState() => PlayedCharacters = [];
 
-    public void SetCurrentPlayer(string userName)
+    public void SetRoundComptroller(string userName)
     {
-        CurrentPlayer = userName;
+        RoundComptroller = userName;
         SetRoundStatus(GameRoundStatus.AwaitingCharacterSelection);
     }
 
